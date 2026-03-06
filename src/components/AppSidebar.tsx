@@ -1,24 +1,29 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
   Users,
   UserCheck,
-  FileText,
   BarChart3,
   Plus,
   Building2,
+  LogOut,
 } from "lucide-react";
-
-const links = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/leads", label: "Leads", icon: Users },
-  { to: "/agents", label: "Agents", icon: UserCheck },
-  { to: "/reports", label: "Reports", icon: BarChart3 },
-  { to: "/add-lead", label: "Add Lead", icon: Plus },
-];
+import { Button } from "@/components/ui/button";
 
 export function AppSidebar() {
   const location = useLocation();
+  const { role, profile, signOut } = useAuth();
+
+  const links = [
+    { to: "/", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/leads", label: "Leads", icon: Users },
+    ...(role === "admin" ? [
+      { to: "/agents", label: "Agents", icon: UserCheck },
+      { to: "/reports", label: "Reports", icon: BarChart3 },
+      { to: "/add-lead", label: "Add Lead", icon: Plus },
+    ] : []),
+  ];
 
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-60 flex-col border-r border-sidebar-border bg-sidebar">
@@ -48,14 +53,17 @@ export function AppSidebar() {
         })}
       </nav>
       <div className="border-t border-sidebar-border p-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-            A
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+              {profile?.full_name?.charAt(0) || "U"}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground">{profile?.full_name || "User"}</p>
+              <p className="text-xs text-muted-foreground capitalize">{role || "user"}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-medium text-foreground">Admin</p>
-            <p className="text-xs text-muted-foreground">admin@realty.com</p>
-          </div>
+          <Button variant="ghost" size="sm" onClick={signOut}><LogOut className="h-4 w-4" /></Button>
         </div>
       </div>
     </aside>
