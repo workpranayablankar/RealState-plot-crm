@@ -1,57 +1,82 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
-import { useCRMStore } from "@/store/crm-store";
-import { LEAD_STATUSES, LEAD_SOURCES, AGENTS } from "@/data/crm-data";
-import { LeadStatus, LeadSource } from "@/types/crm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Search, Filter, Eye } from "lucide-react";
+import { Search, Eye } from "lucide-react";
+import type { Tables } from "@/integrations/supabase/types";
 
-const statusClass: Record<LeadStatus, string> = {
-  "New Lead": "status-new",
-  "Contacted": "status-contacted",
-  "Interested": "status-interested",
-  "Site Visit Scheduled": "status-visit",
-  "Negotiation": "status-negotiation",
-  "Deal Closed": "status-closed",
-  "Not Interested": "status-notinterested",
+type Lead = Tables<"leads">;
+type LeadStatus = Lead["status"];
+
+const STATUSES: LeadStatus[] = ["New Lead", "Contacted", "Interested", "Site Visit Scheduled", "Negotiation", "Deal Closed", "Not Interested"];
+const SOURCES = ["Website", "Facebook Ads", "Google Ads", "Manual"];
+
+const statusClass: Record<string, string> = {
+  "New Lead": "status-new", "Contacted": "status-contacted", "Interested": "status-interested",
+  "Site Visit Scheduled": "status-visit", "Negotiation": "status-negotiation",
+  "Deal Closed": "status-closed", "Not Interested": "status-notinterested",
 };
 
 export default function LeadsPage() {
-  const { leads, updateLead } = useCRMStore();
+  const { role, user } = useAuth();
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [agents, setAgents] = useState<{ user_id: string; full_name: string }[]>([]);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sourceFilter, setSourceFilter] = useState<string>("all");
-  const [agentFilter, setAgentFilter] = useState<string>("all");
-  const [selectedLead, setSelectedLead] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sourceFilter, setSourceFilter] = useState("all");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const fetchLeads = async () => {
+    let query = supabase.from("leads").select("*").order("created_at", { ascending: false });
+    if (role === "agent") query = query.eq("assigned_agent", user?.id);
+    const { data } = await query;
+    setLeads(data || []);
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchLeads();
+      if (role === "admin") {
+        supabase.from("profiles").select("user_id, full_name").then(({ data }) => setAgents(data || []));
+      }
+    }
+  }, [user, role]);
 
   const filtered = leads.filter((l) => {
     const matchSearch = l.name.toLowerCase().includes(search.toLowerCase()) || l.phone.includes(search);
     const matchStatus = statusFilter === "all" || l.status === statusFilter;
     const matchSource = sourceFilter === "all" || l.source === sourceFilter;
-    const matchAgent = agentFilter === "all" || l.assignedAgent === agentFilter;
-    return matchSearch && matchStatus && matchSource && matchAgent;
+    return matchSearch && matchStatus && matchSource;
   });
 
-  const lead = selectedLead ? leads.find((l) => l.id === selectedLead) : null;
+  const selectedLead = selectedId ? leads.find((l) => l.id === selectedId) : null;
+
+  const updateLead = async (id: string, updates: Partial<Lead>) => {
+    await supabase.from("leads").update(updates).eq("id", id);
+    fetchLeads();
+  };
+
+  const getAgentName = (agentId: string | null) => {
+    if (!agentId) return "Unassigned";
+    return agents.find((a) => a.user_id === agentId)?.full_name || "Unknown";
+  };
 
   return (
     <AppLayout>
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Leads</h1>
-            <p className="text-sm text-muted-foreground">{filtered.length} leads found</p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Leads</h1>
+          <p className="text-sm text-muted-foreground">{filtered.length} leads found</p>
         </div>
 
-        {/* Filters */}
         <Card>
           <CardContent className="flex flex-wrap items-center gap-3 p-4">
             <div className="relative flex-1 min-w-[200px]">
@@ -62,27 +87,19 @@ export default function LeadsPage() {
               <SelectTrigger className="w-[180px]"><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
-                {LEAD_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                {STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={sourceFilter} onValueChange={setSourceFilter}>
               <SelectTrigger className="w-[160px]"><SelectValue placeholder="Source" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Sources</SelectItem>
-                {LEAD_SOURCES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Select value={agentFilter} onValueChange={setAgentFilter}>
-              <SelectTrigger className="w-[160px]"><SelectValue placeholder="Agent" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Agents</SelectItem>
-                {AGENTS.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                {SOURCES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
             </Select>
           </CardContent>
         </Card>
 
-        {/* Table */}
         <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
@@ -93,7 +110,7 @@ export default function LeadsPage() {
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Phone</th>
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Property</th>
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Source</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Agent</th>
+                    {role === "admin" && <th className="px-4 py-3 text-left font-medium text-muted-foreground">Agent</th>}
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Budget</th>
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
@@ -104,69 +121,57 @@ export default function LeadsPage() {
                     <tr key={lead.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3 font-medium text-foreground">{lead.name}</td>
                       <td className="px-4 py-3 text-muted-foreground">{lead.phone}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{lead.propertyInterest}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{lead.property_interest}</td>
                       <td className="px-4 py-3"><Badge variant="secondary" className="font-normal">{lead.source}</Badge></td>
-                      <td className="px-4 py-3 text-muted-foreground">{lead.assignedAgentName}</td>
+                      {role === "admin" && <td className="px-4 py-3 text-muted-foreground">{getAgentName(lead.assigned_agent)}</td>}
                       <td className="px-4 py-3"><span className={`status-badge ${statusClass[lead.status]}`}>{lead.status}</span></td>
                       <td className="px-4 py-3 font-medium text-foreground">{lead.budget}</td>
                       <td className="px-4 py-3">
-                        <Button variant="ghost" size="sm" onClick={() => setSelectedLead(lead.id)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => setSelectedId(lead.id)}><Eye className="h-4 w-4" /></Button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {filtered.length === 0 && (
-                <div className="py-12 text-center text-muted-foreground">No leads found.</div>
-              )}
+              {filtered.length === 0 && <div className="py-12 text-center text-muted-foreground">No leads found.</div>}
             </div>
           </CardContent>
         </Card>
 
-        {/* Lead Detail Dialog */}
-        <Dialog open={!!selectedLead} onOpenChange={(open) => !open && setSelectedLead(null)}>
+        <Dialog open={!!selectedLead} onOpenChange={(open) => !open && setSelectedId(null)}>
           <DialogContent className="max-w-lg">
             <DialogHeader><DialogTitle>Lead Details</DialogTitle></DialogHeader>
-            {lead && (
+            {selectedLead && (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><Label className="text-muted-foreground">Name</Label><p className="font-medium">{lead.name}</p></div>
-                  <div><Label className="text-muted-foreground">Phone</Label><p className="font-medium">{lead.phone}</p></div>
-                  <div><Label className="text-muted-foreground">Email</Label><p className="font-medium">{lead.email}</p></div>
-                  <div><Label className="text-muted-foreground">Location</Label><p className="font-medium">{lead.location}</p></div>
-                  <div><Label className="text-muted-foreground">Budget</Label><p className="font-medium">{lead.budget}</p></div>
-                  <div><Label className="text-muted-foreground">Property</Label><p className="font-medium">{lead.propertyInterest}</p></div>
-                  <div><Label className="text-muted-foreground">Source</Label><p className="font-medium">{lead.source}</p></div>
-                  <div><Label className="text-muted-foreground">Agent</Label><p className="font-medium">{lead.assignedAgentName}</p></div>
+                  <div><Label className="text-muted-foreground">Name</Label><p className="font-medium">{selectedLead.name}</p></div>
+                  <div><Label className="text-muted-foreground">Phone</Label><p className="font-medium">{selectedLead.phone}</p></div>
+                  <div><Label className="text-muted-foreground">Email</Label><p className="font-medium">{selectedLead.email}</p></div>
+                  <div><Label className="text-muted-foreground">Location</Label><p className="font-medium">{selectedLead.location}</p></div>
+                  <div><Label className="text-muted-foreground">Budget</Label><p className="font-medium">{selectedLead.budget}</p></div>
+                  <div><Label className="text-muted-foreground">Property</Label><p className="font-medium">{selectedLead.property_interest}</p></div>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Status</Label>
-                  <Select value={lead.status} onValueChange={(val) => updateLead(lead.id, { status: val as LeadStatus })}>
+                  <Select value={selectedLead.status} onValueChange={(val) => updateLead(selectedLead.id, { status: val as LeadStatus })}>
                     <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {LEAD_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                    </SelectContent>
+                    <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label className="text-muted-foreground">Assign Agent</Label>
-                  <Select value={lead.assignedAgent} onValueChange={(val) => {
-                    const agent = AGENTS.find(a => a.id === val);
-                    if (agent) updateLead(lead.id, { assignedAgent: val, assignedAgentName: agent.name });
-                  }}>
-                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {AGENTS.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {role === "admin" && (
+                  <div>
+                    <Label className="text-muted-foreground">Assign Agent</Label>
+                    <Select value={selectedLead.assigned_agent || ""} onValueChange={(val) => updateLead(selectedLead.id, { assigned_agent: val })}>
+                      <SelectTrigger className="mt-1"><SelectValue placeholder="Select agent" /></SelectTrigger>
+                      <SelectContent>{agents.map((a) => <SelectItem key={a.user_id} value={a.user_id}>{a.full_name}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                )}
                 <div>
                   <Label className="text-muted-foreground">Notes</Label>
                   <Textarea
-                    value={lead.notes}
-                    onChange={(e) => updateLead(lead.id, { notes: e.target.value })}
+                    value={selectedLead.notes || ""}
+                    onChange={(e) => updateLead(selectedLead.id, { notes: e.target.value })}
                     placeholder="Add call notes..."
                     className="mt-1"
                   />

@@ -1,18 +1,30 @@
+import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
-import { useCRMStore } from "@/store/crm-store";
-import { AGENTS } from "@/data/crm-data";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 export default function AgentsPage() {
-  const leads = useCRMStore((s) => s.leads);
+  const [agents, setAgents] = useState<any[]>([]);
+  const [leads, setLeads] = useState<any[]>([]);
 
-  const agentStats = AGENTS.map((a) => {
-    const agentLeads = leads.filter((l) => l.assignedAgent === a.id);
+  useEffect(() => {
+    Promise.all([
+      supabase.from("profiles").select("user_id, full_name, email"),
+      supabase.from("leads").select("assigned_agent, status"),
+    ]).then(([profilesRes, leadsRes]) => {
+      setAgents(profilesRes.data || []);
+      setLeads(leadsRes.data || []);
+    });
+  }, []);
+
+  const agentStats = agents.map((a) => {
+    const agentLeads = leads.filter((l) => l.assigned_agent === a.user_id);
     const closed = agentLeads.filter((l) => l.status === "Deal Closed").length;
     const contacted = agentLeads.filter((l) => l.status !== "New Lead").length;
-    const conversion = agentLeads.length > 0 ? ((closed / agentLeads.length) * 100).toFixed(1) : "0";
-    return { ...a, total: agentLeads.length, closed, contacted, conversion };
+    const total = agentLeads.length;
+    const conversion = total > 0 ? ((closed / total) * 100).toFixed(1) : "0";
+    return { ...a, total, closed, contacted, conversion };
   });
 
   return (
@@ -21,14 +33,14 @@ export default function AgentsPage() {
         <h1 className="text-2xl font-bold text-foreground">Agents</h1>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {agentStats.map((a) => (
-            <Card key={a.id}>
+            <Card key={a.user_id}>
               <CardContent className="p-5 space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                    {a.name.split(" ").map(n => n[0]).join("")}
+                    {a.full_name?.split(" ").map((n: string) => n[0]).join("") || "?"}
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground">{a.name}</p>
+                    <p className="font-semibold text-foreground">{a.full_name}</p>
                     <p className="text-xs text-muted-foreground">{a.email}</p>
                   </div>
                 </div>
@@ -48,14 +60,14 @@ export default function AgentsPage() {
                 </div>
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Contacted</span>
-                    <span>{a.contacted}/{a.total}</span>
+                    <span>Contacted</span><span>{a.contacted}/{a.total}</span>
                   </div>
                   <Progress value={a.total > 0 ? (a.contacted / a.total) * 100 : 0} className="h-2" />
                 </div>
               </CardContent>
             </Card>
           ))}
+          {agentStats.length === 0 && <p className="text-muted-foreground col-span-full">No agents registered yet. Create agent accounts to see performance data.</p>}
         </div>
       </div>
     </AppLayout>

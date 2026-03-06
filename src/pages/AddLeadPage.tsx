@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
-import { useCRMStore } from "@/store/crm-store";
-import { AGENTS, LEAD_SOURCES, PROPERTY_INTERESTS } from "@/data/crm-data";
-import { LeadSource, PropertyInterest } from "@/types/crm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -12,32 +11,59 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 
+const SOURCES = ["Website", "Facebook Ads", "Google Ads", "Manual"] as const;
+const PROPERTIES = ["Plot A", "Plot B", "Plot C", "Farm Land", "Commercial Plot", "Residential Plot"];
+
 export default function AddLeadPage() {
   const navigate = useNavigate();
-  const addLead = useCRMStore((s) => s.addLead);
+  const { role } = useAuth();
+  const [agents, setAgents] = useState<{ user_id: string; full_name: string }[]>([]);
   const [form, setForm] = useState({
     name: "", phone: "", email: "", location: "", budget: "",
-    propertyInterest: "" as PropertyInterest, source: "" as LeadSource,
-    assignedAgent: "", notes: "",
+    property_interest: "", source: "" as typeof SOURCES[number] | "",
+    assigned_agent: "", notes: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (role === "admin") {
+      supabase.from("profiles").select("user_id, full_name").then(({ data }) => setAgents(data || []));
+    }
+  }, [role]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.phone) {
       toast({ title: "Error", description: "Name and phone are required", variant: "destructive" });
       return;
     }
-    const agent = AGENTS.find((a) => a.id === form.assignedAgent) || AGENTS[Math.floor(Math.random() * AGENTS.length)];
-    addLead({
-      ...form,
-      assignedAgent: agent.id,
-      assignedAgentName: agent.name,
-      status: "New Lead",
-      propertyInterest: form.propertyInterest || "Residential Plot",
-      source: form.source || "Manual",
+
+    // Round-robin if no agent selected
+    let agentId = form.assigned_agent || null;
+    if (!agentId && agents.length > 0) {
+      const { count } = await supabase.from("leads").select("*", { count: "exact", head: true });
+      const idx = (count || 0) % agents.length;
+      agentId = agents[idx].user_id;
+    }
+
+    const { error } = await supabase.from("leads").insert({
+      name: form.name,
+      phone: form.phone,
+      email: form.email || null,
+      location: form.location || null,
+      budget: form.budget || null,
+      property_interest: form.property_interest || "Residential Plot",
+      source: (form.source || "Manual") as typeof SOURCES[number],
+      assigned_agent: agentId,
+      notes: form.notes || null,
     });
-    toast({ title: "Lead Added", description: `${form.name} has been added and assigned to ${agent.name}` });
-    navigate("/leads");
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      const agentName = agents.find(a => a.user_id === agentId)?.full_name || "auto";
+      toast({ title: "Lead Added", description: `${form.name} assigned to ${agentName}` });
+      navigate("/leads");
+    }
   };
 
   return (
@@ -55,23 +81,23 @@ export default function AddLeadPage() {
                 <div><Label>Budget</Label><Input value={form.budget} onChange={(e) => setForm({...form, budget: e.target.value})} placeholder="₹" /></div>
                 <div>
                   <Label>Property Interest</Label>
-                  <Select value={form.propertyInterest} onValueChange={(v) => setForm({...form, propertyInterest: v as PropertyInterest})}>
+                  <Select value={form.property_interest} onValueChange={(v) => setForm({...form, property_interest: v})}>
                     <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                    <SelectContent>{PROPERTY_INTERESTS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+                    <SelectContent>{PROPERTIES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div>
                   <Label>Lead Source</Label>
-                  <Select value={form.source} onValueChange={(v) => setForm({...form, source: v as LeadSource})}>
+                  <Select value={form.source} onValueChange={(v) => setForm({...form, source: v as typeof SOURCES[number]})}>
                     <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                    <SelectContent>{LEAD_SOURCES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                    <SelectContent>{SOURCES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div>
                   <Label>Assign Agent</Label>
-                  <Select value={form.assignedAgent} onValueChange={(v) => setForm({...form, assignedAgent: v})}>
+                  <Select value={form.assigned_agent} onValueChange={(v) => setForm({...form, assigned_agent: v})}>
                     <SelectTrigger><SelectValue placeholder="Auto-assign" /></SelectTrigger>
-                    <SelectContent>{AGENTS.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
+                    <SelectContent>{agents.map((a) => <SelectItem key={a.user_id} value={a.user_id}>{a.full_name}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
               </div>
