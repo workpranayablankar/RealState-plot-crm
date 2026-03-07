@@ -19,6 +19,7 @@ export function AppSidebar() {
   const links = [
     { to: "/", label: "Dashboard", icon: LayoutDashboard },
     { to: "/leads", label: "Leads", icon: Users },
+    { to: "/plots", label: "Plots", icon: Map },
     ...(role === "admin" ? [
       { to: "/agents", label: "Agents", icon: UserCheck },
       { to: "/reports", label: "Reports", icon: BarChart3 },

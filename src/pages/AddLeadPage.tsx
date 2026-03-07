@@ -12,16 +12,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 
 const SOURCES = ["Website", "Facebook Ads", "Google Ads", "Manual"] as const;
-const PROPERTIES = ["Plot A", "Plot B", "Plot C", "Farm Land", "Commercial Plot", "Residential Plot"];
 
 export default function AddLeadPage() {
   const navigate = useNavigate();
   const { role } = useAuth();
   const [agents, setAgents] = useState<{ user_id: string; full_name: string }[]>([]);
+  const [plots, setPlots] = useState<{ id: string; plot_name: string; plot_no: string }[]>([]);
   const [form, setForm] = useState({
     name: "", phone: "", email: "", location: "", budget: "",
     property_interest: "", source: "" as typeof SOURCES[number] | "",
-    assigned_agent: "", notes: "",
+    assigned_agent: "", notes: "", interested_plot: "",
   });
 
   useEffect(() => {

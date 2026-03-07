@@ -35,6 +35,7 @@ function AppRoutes() {
       <Route path="/agents" element={<ProtectedRoute adminOnly><AgentsPage /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute adminOnly><ReportsPage /></ProtectedRoute>} />
       <Route path="/add-lead" element={<ProtectedRoute adminOnly><AddLeadPage /></ProtectedRoute>} />
+      <Route path="/plots" element={<ProtectedRoute><PlotsPage /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Search, Eye } from "lucide-react";
+import { Search, Eye, Download } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Lead = Tables<"leads">;
@@ -29,6 +30,7 @@ export default function LeadsPage() {
   const { role, user } = useAuth();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [agents, setAgents] = useState<{ user_id: string; full_name: string }[]>([]);
+  const [plots, setPlots] = useState<{ id: string; plot_name: string; plot_no: string }[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sourceFilter, setSourceFilter] = useState("all");
@@ -44,6 +46,7 @@ export default function LeadsPage() {
   useEffect(() => {
     if (user) {
       fetchLeads();
+      supabase.from("plots").select("id, plot_name, plot_no").then(({ data }) => setPlots(data || []));
       if (role === "admin") {
         supabase.from("profiles").select("user_id, full_name").then(({ data }) => setAgents(data || []));
       }
@@ -69,12 +72,43 @@ export default function LeadsPage() {
     return agents.find((a) => a.user_id === agentId)?.full_name || "Unknown";
   };
 
+  const getPlotName = (plotId: string | null) => {
+    if (!plotId) return "—";
+    const p = plots.find((pl) => pl.id === plotId);
+    return p ? `${p.plot_name} (${p.plot_no})` : "—";
+  };
+
+  const exportCSV = () => {
+    const headers = ["Name", "Phone", "Email", "Location", "Budget", "Property Interest", "Interested Plot", "Source", "Agent", "Status", "Notes", "Created"];
+    const rows = filtered.map((l) => [
+      l.name, l.phone, l.email || "", l.location || "", l.budget || "",
+      l.property_interest || "", getPlotName((l as any).interested_plot),
+      l.source, getAgentName(l.assigned_agent), l.status, (l.notes || "").replace(/\n/g, " "), l.created_at,
+    ]);
+    const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `leads-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Exported", description: `${filtered.length} leads exported to CSV` });
+  };
+
   return (
     <AppLayout>
       <div className="space-y-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Leads</h1>
-          <p className="text-sm text-muted-foreground">{filtered.length} leads found</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Leads</h1>
+            <p className="text-sm text-muted-foreground">{filtered.length} leads found</p>
+          </div>
+          {role === "admin" && (
+            <Button variant="outline" onClick={exportCSV}>
+              <Download className="mr-2 h-4 w-4" />Export CSV
+            </Button>
+          )}
         </div>
 
         <Card>
@@ -108,7 +142,7 @@ export default function LeadsPage() {
                   <tr className="border-b bg-muted/50">
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Name</th>
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Phone</th>
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Property</th>
+                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Interested Plot</th>
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Source</th>
                     {role === "admin" && <th className="px-4 py-3 text-left font-medium text-muted-foreground">Agent</th>}
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
@@ -121,7 +155,7 @@ export default function LeadsPage() {
                     <tr key={lead.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3 font-medium text-foreground">{lead.name}</td>
                       <td className="px-4 py-3 text-muted-foreground">{lead.phone}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{lead.property_interest}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{getPlotName((lead as any).interested_plot)}</td>
                       <td className="px-4 py-3"><Badge variant="secondary" className="font-normal">{lead.source}</Badge></td>
                       {role === "admin" && <td className="px-4 py-3 text-muted-foreground">{getAgentName(lead.assigned_agent)}</td>}
                       <td className="px-4 py-3"><span className={`status-badge ${statusClass[lead.status]}`}>{lead.status}</span></td>
@@ -149,7 +183,20 @@ export default function LeadsPage() {
                   <div><Label className="text-muted-foreground">Email</Label><p className="font-medium">{selectedLead.email}</p></div>
                   <div><Label className="text-muted-foreground">Location</Label><p className="font-medium">{selectedLead.location}</p></div>
                   <div><Label className="text-muted-foreground">Budget</Label><p className="font-medium">{selectedLead.budget}</p></div>
-                  <div><Label className="text-muted-foreground">Property</Label><p className="font-medium">{selectedLead.property_interest}</p></div>
+                  <div><Label className="text-muted-foreground">Property Interest</Label><p className="font-medium">{selectedLead.property_interest}</p></div>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Interested Plot</Label>
+                  <Select
+                    value={(selectedLead as any).interested_plot || "none"}
+                    onValueChange={(val) => updateLead(selectedLead.id, { interested_plot: val === "none" ? null : val } as any)}
+                  >
+                    <SelectTrigger className="mt-1"><SelectValue placeholder="Select plot" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">— None —</SelectItem>
+                      {plots.map((p) => <SelectItem key={p.id} value={p.id}>{p.plot_name} ({p.plot_no})</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Status</Label>
