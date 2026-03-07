@@ -25,6 +25,7 @@ export default function AddLeadPage() {
   });
 
   useEffect(() => {
+    supabase.from("plots").select("id, plot_name, plot_no").then(({ data }) => setPlots(data || []));
     if (role === "admin") {
       supabase.from("profiles").select("user_id, full_name").then(({ data }) => setAgents(data || []));
     }
