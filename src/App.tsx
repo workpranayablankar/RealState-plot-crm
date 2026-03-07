@@ -10,6 +10,12 @@ import AgentsPage from "./pages/AgentsPage";
 import ReportsPage from "./pages/ReportsPage";
 import AddLeadPage from "./pages/AddLeadPage";
 import PlotsPage from "./pages/PlotsPage";
+import FollowUpsPage from "./pages/FollowUpsPage";
+import ActivitiesPage from "./pages/ActivitiesPage";
+import NotificationsPage from "./pages/NotificationsPage";
+import SettingsPage from "./pages/settings/SettingsPage";
+import UserManagementPage from "./pages/settings/UserManagementPage";
+import SettingsPlaceholder from "./pages/settings/SettingsPlaceholder";
 import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
 
@@ -32,10 +38,25 @@ function AppRoutes() {
       <Route path="/login" element={session ? <Navigate to="/" /> : <LoginPage />} />
       <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/leads" element={<ProtectedRoute><LeadsPage /></ProtectedRoute>} />
+      <Route path="/add-lead" element={<ProtectedRoute adminOnly><AddLeadPage /></ProtectedRoute>} />
+      <Route path="/follow-ups" element={<ProtectedRoute><FollowUpsPage /></ProtectedRoute>} />
       <Route path="/agents" element={<ProtectedRoute adminOnly><AgentsPage /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute adminOnly><ReportsPage /></ProtectedRoute>} />
-      <Route path="/add-lead" element={<ProtectedRoute adminOnly><AddLeadPage /></ProtectedRoute>} />
       <Route path="/plots" element={<ProtectedRoute><PlotsPage /></ProtectedRoute>} />
+      <Route path="/activities" element={<ProtectedRoute><ActivitiesPage /></ProtectedRoute>} />
+      <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute adminOnly><SettingsPage /></ProtectedRoute>}>
+        <Route path="users" element={<UserManagementPage />} />
+        <Route path="roles" element={<SettingsPlaceholder />} />
+        <Route path="lead-statuses" element={<SettingsPlaceholder />} />
+        <Route path="lead-sources" element={<SettingsPlaceholder />} />
+        <Route path="plots" element={<SettingsPlaceholder />} />
+        <Route path="assignment" element={<SettingsPlaceholder />} />
+        <Route path="integrations" element={<SettingsPlaceholder />} />
+        <Route path="notifications" element={<SettingsPlaceholder />} />
+        <Route path="import-export" element={<SettingsPlaceholder />} />
+        <Route path="preferences" element={<SettingsPlaceholder />} />
+      </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
