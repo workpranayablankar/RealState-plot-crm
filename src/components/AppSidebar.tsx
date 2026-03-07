@@ -7,6 +7,7 @@ import {
   BarChart3,
   Plus,
   Building2,
+  Map,
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";

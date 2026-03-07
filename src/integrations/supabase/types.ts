@@ -21,6 +21,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          interested_plot: string | null
           location: string | null
           name: string
           notes: string | null
@@ -36,6 +37,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          interested_plot?: string | null
           location?: string | null
           name: string
           notes?: string | null
@@ -51,6 +53,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          interested_plot?: string | null
           location?: string | null
           name?: string
           notes?: string | null
@@ -58,6 +61,50 @@ export type Database = {
           property_interest?: string | null
           source?: Database["public"]["Enums"]["lead_source"]
           status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_interested_plot_fkey"
+            columns: ["interested_plot"]
+            isOneToOne: false
+            referencedRelation: "plots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plots: {
+        Row: {
+          created_at: string
+          id: string
+          location: string
+          plot_name: string
+          plot_no: string
+          price: string
+          size: string
+          status: Database["public"]["Enums"]["plot_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location?: string
+          plot_name: string
+          plot_no?: string
+          price?: string
+          size?: string
+          status?: Database["public"]["Enums"]["plot_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location?: string
+          plot_name?: string
+          plot_no?: string
+          price?: string
+          size?: string
+          status?: Database["public"]["Enums"]["plot_status"]
           updated_at?: string
         }
         Relationships: []
@@ -128,6 +175,7 @@ export type Database = {
         | "Negotiation"
         | "Deal Closed"
         | "Not Interested"
+      plot_status: "Available" | "Booked" | "Sold"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -266,6 +314,7 @@ export const Constants = {
         "Deal Closed",
         "Not Interested",
       ],
+      plot_status: ["Available", "Booked", "Sold"],
     },
   },
 } as const

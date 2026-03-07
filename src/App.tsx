@@ -9,6 +9,7 @@ import LeadsPage from "./pages/LeadsPage";
 import AgentsPage from "./pages/AgentsPage";
 import ReportsPage from "./pages/ReportsPage";
 import AddLeadPage from "./pages/AddLeadPage";
+import PlotsPage from "./pages/PlotsPage";
 import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
 
