@@ -56,7 +56,8 @@ export default function AddLeadPage() {
       source: (form.source || "Manual") as typeof SOURCES[number],
       assigned_agent: agentId,
       notes: form.notes || null,
-    });
+      interested_plot: form.interested_plot || null,
+    } as any);
 
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
