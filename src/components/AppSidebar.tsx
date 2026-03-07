@@ -7,6 +7,7 @@ import {
   BarChart3,
   Plus,
   Building2,
+  Map,
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export function AppSidebar() {
   const links = [
     { to: "/", label: "Dashboard", icon: LayoutDashboard },
     { to: "/leads", label: "Leads", icon: Users },
+    { to: "/plots", label: "Plots", icon: Map },
     ...(role === "admin" ? [
       { to: "/agents", label: "Agents", icon: UserCheck },
       { to: "/reports", label: "Reports", icon: BarChart3 },

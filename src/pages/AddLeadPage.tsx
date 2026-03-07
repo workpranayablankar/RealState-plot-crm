@@ -12,19 +12,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 
 const SOURCES = ["Website", "Facebook Ads", "Google Ads", "Manual"] as const;
-const PROPERTIES = ["Plot A", "Plot B", "Plot C", "Farm Land", "Commercial Plot", "Residential Plot"];
 
 export default function AddLeadPage() {
   const navigate = useNavigate();
   const { role } = useAuth();
   const [agents, setAgents] = useState<{ user_id: string; full_name: string }[]>([]);
+  const [plots, setPlots] = useState<{ id: string; plot_name: string; plot_no: string }[]>([]);
   const [form, setForm] = useState({
     name: "", phone: "", email: "", location: "", budget: "",
     property_interest: "", source: "" as typeof SOURCES[number] | "",
-    assigned_agent: "", notes: "",
+    assigned_agent: "", notes: "", interested_plot: "",
   });
 
   useEffect(() => {
+    supabase.from("plots").select("id, plot_name, plot_no").then(({ data }) => setPlots(data || []));
     if (role === "admin") {
       supabase.from("profiles").select("user_id, full_name").then(({ data }) => setAgents(data || []));
     }
@@ -55,7 +56,8 @@ export default function AddLeadPage() {
       source: (form.source || "Manual") as typeof SOURCES[number],
       assigned_agent: agentId,
       notes: form.notes || null,
-    });
+      interested_plot: form.interested_plot || null,
+    } as any);
 
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -80,10 +82,10 @@ export default function AddLeadPage() {
                 <div><Label>Location</Label><Input value={form.location} onChange={(e) => setForm({...form, location: e.target.value})} /></div>
                 <div><Label>Budget</Label><Input value={form.budget} onChange={(e) => setForm({...form, budget: e.target.value})} placeholder="₹" /></div>
                 <div>
-                  <Label>Property Interest</Label>
-                  <Select value={form.property_interest} onValueChange={(v) => setForm({...form, property_interest: v})}>
-                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                    <SelectContent>{PROPERTIES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+                  <Label>Interested Plot</Label>
+                  <Select value={form.interested_plot} onValueChange={(v) => setForm({...form, interested_plot: v})}>
+                    <SelectTrigger><SelectValue placeholder="Select plot" /></SelectTrigger>
+                    <SelectContent>{plots.map((p) => <SelectItem key={p.id} value={p.id}>{p.plot_name} ({p.plot_no})</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div>
