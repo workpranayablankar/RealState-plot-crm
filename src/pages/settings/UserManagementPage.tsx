@@ -173,6 +173,7 @@ export default function UserManagementPage() {
                   <SelectContent>
                     <SelectItem value="admin">Admin</SelectItem>
                     <SelectItem value="agent">Agent</SelectItem>
+                    <SelectItem value="telecaller">Telecaller</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
