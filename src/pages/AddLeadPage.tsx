@@ -27,6 +27,7 @@ export default function AddLeadPage() {
   const [plotSearch, setPlotSearch] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const [form, setForm] = useState({
     name: "", phone: "", email: "", location: "", address: "", budget: "",
