@@ -40,9 +40,11 @@ export default function AddLeadPage() {
       return;
     }
 
-    // Round-robin if no agent selected
+    // For agents, self-assign. For admin, round-robin if no agent selected.
     let agentId = form.assigned_agent || null;
-    if (!agentId && agents.length > 0) {
+    if (role === "agent") {
+      agentId = user?.id || null;
+    } else if (!agentId && agents.length > 0) {
       const { count } = await supabase.from("leads").select("*", { count: "exact", head: true });
       const idx = (count || 0) % agents.length;
       agentId = agents[idx].user_id;
