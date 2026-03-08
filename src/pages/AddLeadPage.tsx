@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,8 +12,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "@/hooks/use-toast";
-import { Check, ChevronsUpDown, UserPlus } from "lucide-react";
+import { Check, ChevronsUpDown, UserPlus, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ImportLeadsModal } from "@/components/ImportLeadsModal";
 
 const SOURCES = ["Website", "Facebook", "Instagram", "Referral", "Direct Call", "Other"] as const;
 
@@ -26,6 +27,7 @@ export default function AddLeadPage() {
   const [plotSearch, setPlotSearch] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const [form, setForm] = useState({
     name: "", phone: "", email: "", location: "", address: "", budget: "",
@@ -110,14 +112,19 @@ export default function AddLeadPage() {
   return (
     <AppLayout>
       <div className="max-w-2xl mx-auto space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <UserPlus className="h-6 w-6 text-primary" />
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <UserPlus className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Add New Lead</h1>
+              <p className="text-sm text-muted-foreground">Fill in the details to create a new lead</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Add New Lead</h1>
-            <p className="text-sm text-muted-foreground">Fill in the details to create a new lead</p>
-          </div>
+          <Button variant="outline" onClick={() => setImportOpen(true)}>
+            <Upload className="h-4 w-4 mr-2" /> Import Leads (CSV)
+          </Button>
         </div>
 
         <Card>
@@ -294,6 +301,7 @@ export default function AddLeadPage() {
           </CardContent>
         </Card>
       </div>
+      <ImportLeadsModal open={importOpen} onOpenChange={setImportOpen} onImported={() => navigate("/leads")} />
     </AppLayout>
   );
 }
