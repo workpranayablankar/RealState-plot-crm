@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarClock, Plus, Check, Phone, Clock, AlertTriangle } from "lucide-react";
+import { CalendarClock, Plus, Check, Phone, Clock, AlertTriangle, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { format, isToday, isTomorrow, isBefore, startOfDay } from "date-fns";
 
@@ -78,6 +78,12 @@ export default function FollowUpsPage() {
     fetchData();
   };
 
+  const deleteFollowUp = async (id: string) => {
+    await supabase.from("follow_ups").delete().eq("id", id);
+    toast({ title: "Follow-up deleted" });
+    fetchData();
+  };
+
   const handleAdd = async () => {
     if (!form.lead_id || !form.follow_up_date) {
       toast({ title: "Please select a lead and date", variant: "destructive" });
@@ -116,6 +122,11 @@ export default function FollowUpsPage() {
           </Button>
         )}
         {fu.status === "Completed" && <Badge className="bg-success text-success-foreground">Completed</Badge>}
+        {role === "admin" && (
+          <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => deleteFollowUp(fu.id)}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   );
