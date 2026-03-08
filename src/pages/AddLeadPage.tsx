@@ -25,6 +25,8 @@ export default function AddLeadPage() {
   const [plots, setPlots] = useState<{ id: string; plot_name: string; plot_no: string }[]>([]);
   const [plotOpen, setPlotOpen] = useState(false);
   const [plotSearch, setPlotSearch] = useState("");
+  const [agentOpen, setAgentOpen] = useState(false);
+  const [agentSearch, setAgentSearch] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
