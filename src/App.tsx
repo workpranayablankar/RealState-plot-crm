@@ -51,6 +51,7 @@ function AppRoutes() {
       <Route path="/follow-ups" element={<ProtectedRoute><FollowUpsPage /></ProtectedRoute>} />
       <Route path="/agents" element={<ProtectedRoute adminOnly><AgentsPage /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute adminOnly><ReportsPage /></ProtectedRoute>} />
+      <Route path="/call-history" element={<ProtectedRoute><CallHistoryPage /></ProtectedRoute>} />
       <Route path="/plots" element={<ProtectedRoute><PlotsPage /></ProtectedRoute>} />
       <Route path="/activities" element={<ProtectedRoute><ActivitiesPage /></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />

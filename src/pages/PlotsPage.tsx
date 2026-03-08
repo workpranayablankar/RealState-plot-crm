@@ -182,7 +182,7 @@ export default function PlotsPage() {
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Size</th>
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Price</th>
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
-                    {role === "admin" && <th className="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>}
+                    {(role === "admin") && <th className="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>}
                   </tr>
                 </thead>
                 <tbody>

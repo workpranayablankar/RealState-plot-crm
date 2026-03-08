@@ -106,7 +106,7 @@ export default function Dashboard() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
           <p className="text-sm text-muted-foreground">
-            {role === "admin" ? "Real estate lead management overview" : "Your assigned leads overview"}
+            {role === "admin" ? "Real estate lead management overview" : role === "telecaller" ? "Your daily work summary" : "Your assigned leads overview"}
           </p>
         </div>
 

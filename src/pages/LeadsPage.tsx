@@ -176,6 +176,11 @@ export default function LeadsPage() {
                       <td className="px-4 py-3 font-medium text-foreground">{lead.budget}</td>
                       <td className="px-4 py-3 flex items-center gap-1">
                         <Button variant="ghost" size="sm" onClick={() => setSelectedId(lead.id)}><Eye className="h-4 w-4" /></Button>
+                        {role === "telecaller" && (
+                          <Button variant="ghost" size="sm" asChild>
+                            <a href={`tel:${lead.phone}`}><Phone className="h-4 w-4 text-success" /></a>
+                          </Button>
+                        )}
                         {role === "admin" && (
                           <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => deleteLead(lead.id)}>
                             <Trash2 className="h-4 w-4" />
