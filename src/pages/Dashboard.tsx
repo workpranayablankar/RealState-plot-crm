@@ -111,7 +111,7 @@ export default function Dashboard() {
         </div>
 
         {/* Summary Widgets */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+        <div className={`grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 ${role !== "telecaller" ? "xl:grid-cols-7" : "xl:grid-cols-6"}`}>
           {summaryCards.map((c) => (
             <Card key={c.label}>
               <CardContent className="p-4 text-center">
