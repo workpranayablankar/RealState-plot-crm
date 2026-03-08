@@ -108,6 +108,7 @@ export default function LeadAssignmentPage() {
         </CardContent>
       </Card>
 
+      {/* Active Agents */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
@@ -125,6 +126,7 @@ export default function LeadAssignmentPage() {
                   <p className="text-sm font-medium text-foreground truncate">{agent.full_name}</p>
                   <p className="text-xs text-muted-foreground">{agent.email}</p>
                 </div>
+                <Badge variant="secondary" className="text-xs">Agent</Badge>
                 {method === "round_robin" && (
                   <span className="text-xs text-muted-foreground">Position {i + 1}</span>
                 )}
@@ -132,6 +134,37 @@ export default function LeadAssignmentPage() {
             ))}
             {agents.length === 0 && (
               <p className="px-4 py-6 text-sm text-muted-foreground text-center">No agents found.</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Active Telecallers */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Phone className="h-4 w-4" /> Active Telecallers ({telecallers.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="divide-y">
+            {telecallers.map((tc, i) => (
+              <div key={tc.user_id} className="flex items-center gap-3 px-4 py-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground">
+                  {tc.full_name?.charAt(0) || "?"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{tc.full_name}</p>
+                  <p className="text-xs text-muted-foreground">{tc.email}</p>
+                </div>
+                <Badge variant="outline" className="text-xs">Telecaller</Badge>
+                {method === "round_robin" && (
+                  <span className="text-xs text-muted-foreground">Position {i + 1}</span>
+                )}
+              </div>
+            ))}
+            {telecallers.length === 0 && (
+              <p className="px-4 py-6 text-sm text-muted-foreground text-center">No telecallers found.</p>
             )}
           </div>
         </CardContent>
