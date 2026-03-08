@@ -12,14 +12,17 @@ const STATUSES = ["New Lead", "Contacted", "Interested", "Site Visit Scheduled",
 export default function ReportsPage() {
   const [leads, setLeads] = useState<any[]>([]);
   const [agents, setAgents] = useState<any[]>([]);
+  const [roles, setRoles] = useState<any[]>([]);
 
   useEffect(() => {
     Promise.all([
       supabase.from("leads").select("*"),
       supabase.from("profiles").select("user_id, full_name"),
-    ]).then(([leadsRes, profilesRes]) => {
+      supabase.from("user_roles").select("user_id, role"),
+    ]).then(([leadsRes, profilesRes, rolesRes]) => {
       setLeads(leadsRes.data || []);
       setAgents(profilesRes.data || []);
+      setRoles(rolesRes.data || []);
     });
   }, []);
 
