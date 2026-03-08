@@ -5,17 +5,20 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { RefreshCw, UserPlus, Users } from "lucide-react";
+import { RefreshCw, UserPlus, Users, Phone } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
-interface Agent {
+interface UserWithRole {
   user_id: string;
   full_name: string;
   email: string;
+  role: string;
 }
 
 export default function LeadAssignmentPage() {
   const [method, setMethod] = useState<string>("manual");
-  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agents, setAgents] = useState<UserWithRole[]>([]);
+  const [telecallers, setTelecallers] = useState<UserWithRole[]>([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [settingsId, setSettingsId] = useState<string | null>(null);
@@ -35,9 +38,14 @@ export default function LeadAssignmentPage() {
       }
 
       const roles = rolesRes.data || [];
-      const agentIds = new Set(roles.filter((r) => r.role === "agent").map((r) => r.user_id));
-      const profiles = (profilesRes.data || []).filter((p) => agentIds.has(p.user_id));
-      setAgents(profiles);
+      const profiles = profilesRes.data || [];
+      const roleMap = new Map(roles.map((r) => [r.user_id, r.role]));
+
+      const agentList = profiles.filter((p) => roleMap.get(p.user_id) === "agent").map(p => ({ ...p, role: "agent" }));
+      const telecallerList = profiles.filter((p) => roleMap.get(p.user_id) === "telecaller").map(p => ({ ...p, role: "telecaller" }));
+
+      setAgents(agentList);
+      setTelecallers(telecallerList);
       setLoading(false);
     };
     init();
@@ -59,7 +67,7 @@ export default function LeadAssignmentPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold text-foreground">Lead Assignment Rules</h2>
-        <p className="text-sm text-muted-foreground">Configure how new leads are distributed to agents</p>
+        <p className="text-sm text-muted-foreground">Configure how new leads are distributed to agents and telecallers</p>
       </div>
 
       <Card>
@@ -100,6 +108,7 @@ export default function LeadAssignmentPage() {
         </CardContent>
       </Card>
 
+      {/* Active Agents */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
@@ -117,6 +126,7 @@ export default function LeadAssignmentPage() {
                   <p className="text-sm font-medium text-foreground truncate">{agent.full_name}</p>
                   <p className="text-xs text-muted-foreground">{agent.email}</p>
                 </div>
+                <Badge variant="secondary" className="text-xs">Agent</Badge>
                 {method === "round_robin" && (
                   <span className="text-xs text-muted-foreground">Position {i + 1}</span>
                 )}
@@ -124,6 +134,37 @@ export default function LeadAssignmentPage() {
             ))}
             {agents.length === 0 && (
               <p className="px-4 py-6 text-sm text-muted-foreground text-center">No agents found.</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Active Telecallers */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Phone className="h-4 w-4" /> Active Telecallers ({telecallers.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="divide-y">
+            {telecallers.map((tc, i) => (
+              <div key={tc.user_id} className="flex items-center gap-3 px-4 py-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground">
+                  {tc.full_name?.charAt(0) || "?"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{tc.full_name}</p>
+                  <p className="text-xs text-muted-foreground">{tc.email}</p>
+                </div>
+                <Badge variant="outline" className="text-xs">Telecaller</Badge>
+                {method === "round_robin" && (
+                  <span className="text-xs text-muted-foreground">Position {i + 1}</span>
+                )}
+              </div>
+            ))}
+            {telecallers.length === 0 && (
+              <p className="px-4 py-6 text-sm text-muted-foreground text-center">No telecallers found.</p>
             )}
           </div>
         </CardContent>
