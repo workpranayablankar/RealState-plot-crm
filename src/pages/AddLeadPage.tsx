@@ -12,8 +12,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "@/hooks/use-toast";
-import { Check, ChevronsUpDown, UserPlus } from "lucide-react";
+import { Check, ChevronsUpDown, UserPlus, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ImportLeadsModal } from "@/components/ImportLeadsModal";
 
 const SOURCES = ["Website", "Facebook", "Instagram", "Referral", "Direct Call", "Other"] as const;
 
