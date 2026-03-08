@@ -61,9 +61,9 @@ function AppRoutes() {
         <Route path="plots" element={<PlotSettingsPage />} />
         <Route path="assignment" element={<LeadAssignmentPage />} />
         <Route path="integrations" element={<IntegrationsPage />} />
-        <Route path="notifications" element={<SettingsPlaceholder />} />
-        <Route path="import-export" element={<SettingsPlaceholder />} />
-        <Route path="preferences" element={<SettingsPlaceholder />} />
+        <Route path="notifications" element={<NotificationSettingsPage />} />
+        <Route path="import-export" element={<ImportExportPage />} />
+        <Route path="preferences" element={<SystemPreferencesPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
