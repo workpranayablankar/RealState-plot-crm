@@ -46,7 +46,7 @@ function AppRoutes() {
       <Route path="/login" element={session ? <Navigate to="/" /> : <LoginPage />} />
       <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/leads" element={<ProtectedRoute><LeadsPage /></ProtectedRoute>} />
-      <Route path="/add-lead" element={<ProtectedRoute adminOnly><AddLeadPage /></ProtectedRoute>} />
+      <Route path="/add-lead" element={<ProtectedRoute><AddLeadPage /></ProtectedRoute>} />
       <Route path="/follow-ups" element={<ProtectedRoute><FollowUpsPage /></ProtectedRoute>} />
       <Route path="/agents" element={<ProtectedRoute adminOnly><AgentsPage /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute adminOnly><ReportsPage /></ProtectedRoute>} />
