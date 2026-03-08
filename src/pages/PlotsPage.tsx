@@ -80,9 +80,7 @@ export default function PlotsPage() {
             <h1 className="text-2xl font-bold text-foreground">Plots / Properties</h1>
             <p className="text-sm text-muted-foreground">{plots.length} plots total</p>
           </div>
-          {role === "admin" && (
-            <Button onClick={openNew}><Plus className="mr-2 h-4 w-4" />Add Plot</Button>
-          )}
+          <Button onClick={openNew}><Plus className="mr-2 h-4 w-4" />Add Plot</Button>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
