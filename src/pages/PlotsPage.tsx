@@ -39,6 +39,7 @@ export default function PlotsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [importing, setImporting] = useState(false);
 
   const fetchPlots = async () => {
     const { data } = await supabase.from("plots").select("*").order("created_at", { ascending: false });
