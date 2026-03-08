@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarClock, Plus, Check, Phone, Clock, AlertTriangle } from "lucide-react";
+import { CalendarClock, Plus, Check, Phone, Clock, AlertTriangle, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { format, isToday, isTomorrow, isBefore, startOfDay } from "date-fns";
 
