@@ -46,7 +46,12 @@ serve(async (req) => {
     if (target_user_id === user.id) {
       return new Response(JSON.stringify({ error: "Cannot delete yourself" }), { status: 400, headers: corsHeaders });
     }
-    // Delete from user_roles and profiles first, then auth
+    // Clean up all related data before deleting the auth user
+    await supabaseAdmin.from("notifications").delete().eq("user_id", target_user_id);
+    await supabaseAdmin.from("activities").delete().eq("user_id", target_user_id);
+    await supabaseAdmin.from("call_history").delete().eq("user_id", target_user_id);
+    await supabaseAdmin.from("follow_ups").delete().eq("assigned_agent", target_user_id);
+    await supabaseAdmin.from("leads").update({ assigned_agent: null }).eq("assigned_agent", target_user_id);
     await supabaseAdmin.from("user_roles").delete().eq("user_id", target_user_id);
     await supabaseAdmin.from("profiles").delete().eq("user_id", target_user_id);
     const { error } = await supabaseAdmin.auth.admin.deleteUser(target_user_id);
