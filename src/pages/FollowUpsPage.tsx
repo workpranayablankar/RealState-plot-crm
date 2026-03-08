@@ -122,6 +122,11 @@ export default function FollowUpsPage() {
           </Button>
         )}
         {fu.status === "Completed" && <Badge className="bg-success text-success-foreground">Completed</Badge>}
+        {role === "admin" && (
+          <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => deleteFollowUp(fu.id)}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   );
