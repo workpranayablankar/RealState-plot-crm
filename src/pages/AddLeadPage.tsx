@@ -52,6 +52,12 @@ export default function AddLeadPage() {
     );
   }, [plots, plotSearch]);
 
+  const filteredAgents = useMemo(() => {
+    if (!agentSearch) return agents;
+    const q = agentSearch.toLowerCase();
+    return agents.filter(a => a.full_name.toLowerCase().includes(q));
+  }, [agents, agentSearch]);
+
   const validate = () => {
     const errs: Record<string, string> = {};
     if (!form.name.trim()) errs.name = "Name is required";
