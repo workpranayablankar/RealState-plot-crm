@@ -301,6 +301,7 @@ export default function AddLeadPage() {
           </CardContent>
         </Card>
       </div>
+      <ImportLeadsModal open={importOpen} onOpenChange={setImportOpen} onImported={() => navigate("/leads")} />
     </AppLayout>
   );
 }
