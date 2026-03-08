@@ -17,7 +17,8 @@ interface UserWithRole {
 
 export default function LeadAssignmentPage() {
   const [method, setMethod] = useState<string>("manual");
-  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agents, setAgents] = useState<UserWithRole[]>([]);
+  const [telecallers, setTelecallers] = useState<UserWithRole[]>([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [settingsId, setSettingsId] = useState<string | null>(null);
@@ -37,9 +38,14 @@ export default function LeadAssignmentPage() {
       }
 
       const roles = rolesRes.data || [];
-      const agentIds = new Set(roles.filter((r) => r.role === "agent").map((r) => r.user_id));
-      const profiles = (profilesRes.data || []).filter((p) => agentIds.has(p.user_id));
-      setAgents(profiles);
+      const profiles = profilesRes.data || [];
+      const roleMap = new Map(roles.map((r) => [r.user_id, r.role]));
+
+      const agentList = profiles.filter((p) => roleMap.get(p.user_id) === "agent").map(p => ({ ...p, role: "agent" }));
+      const telecallerList = profiles.filter((p) => roleMap.get(p.user_id) === "telecaller").map(p => ({ ...p, role: "telecaller" }));
+
+      setAgents(agentList);
+      setTelecallers(telecallerList);
       setLoading(false);
     };
     init();
