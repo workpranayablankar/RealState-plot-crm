@@ -15,6 +15,8 @@ import ActivitiesPage from "./pages/ActivitiesPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import SettingsPage from "./pages/settings/SettingsPage";
 import UserManagementPage from "./pages/settings/UserManagementPage";
+import RolesPermissionsPage from "./pages/settings/RolesPermissionsPage";
+import LeadStatusSetupPage from "./pages/settings/LeadStatusSetupPage";
 import SettingsPlaceholder from "./pages/settings/SettingsPlaceholder";
 import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
