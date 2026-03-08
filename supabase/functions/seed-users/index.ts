@@ -21,6 +21,11 @@ serve(async (req) => {
     { email: "akash@realty.com", password: "agent123456", full_name: "Akash Singh", role: "agent" },
     { email: "neha@realty.com", password: "agent123456", full_name: "Neha Gupta", role: "agent" },
     { email: "vikram@realty.com", password: "agent123456", full_name: "Vikram Reddy", role: "agent" },
+    { email: "telecaller1@realty.com", password: "tele123456", full_name: "Anjali Verma", role: "telecaller" },
+    { email: "telecaller2@realty.com", password: "tele123456", full_name: "Suresh Kumar", role: "telecaller" },
+    { email: "telecaller3@realty.com", password: "tele123456", full_name: "Pooja Yadav", role: "telecaller" },
+    { email: "telecaller4@realty.com", password: "tele123456", full_name: "Ravi Tiwari", role: "telecaller" },
+    { email: "telecaller5@realty.com", password: "tele123456", full_name: "Meena Joshi", role: "telecaller" },
   ];
 
   const results = [];
