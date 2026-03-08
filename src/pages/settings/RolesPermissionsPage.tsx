@@ -5,7 +5,7 @@ import { CheckCircle2, XCircle } from "lucide-react";
 const permissions = [
   { label: "View all leads", admin: true, agent: false },
   { label: "View assigned leads", admin: true, agent: true },
-  { label: "Add new leads", admin: true, agent: false },
+  { label: "Add new leads", admin: true, agent: true },
   { label: "Update lead status", admin: true, agent: true },
   { label: "Assign leads to agents", admin: true, agent: false },
   { label: "Add notes to leads", admin: true, agent: true },

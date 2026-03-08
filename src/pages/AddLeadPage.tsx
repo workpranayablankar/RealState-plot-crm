@@ -99,13 +99,15 @@ export default function AddLeadPage() {
                     <SelectContent>{SOURCES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label>Assign Agent</Label>
-                  <Select value={form.assigned_agent} onValueChange={(v) => setForm({...form, assigned_agent: v})}>
-                    <SelectTrigger><SelectValue placeholder="Auto-assign" /></SelectTrigger>
-                    <SelectContent>{agents.map((a) => <SelectItem key={a.user_id} value={a.user_id}>{a.full_name}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
+                {role === "admin" && (
+                  <div>
+                    <Label>Assign Agent</Label>
+                    <Select value={form.assigned_agent} onValueChange={(v) => setForm({...form, assigned_agent: v})}>
+                      <SelectTrigger><SelectValue placeholder="Auto-assign" /></SelectTrigger>
+                      <SelectContent>{agents.map((a) => <SelectItem key={a.user_id} value={a.user_id}>{a.full_name}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
               <div><Label>Notes</Label><Textarea value={form.notes} onChange={(e) => setForm({...form, notes: e.target.value})} /></div>
               <Button type="submit" className="w-full">Add Lead</Button>
