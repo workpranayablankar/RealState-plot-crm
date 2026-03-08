@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Globe, Facebook, BarChart3, MessageCircle, Copy, CheckCircle2, ExternalLink, Zap } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Globe, Facebook, BarChart3, MessageCircle, Copy, CheckCircle2, ExternalLink, Zap, Plus, Trash2, Key, Eye, EyeOff } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || "";
 const BASE_URL = `https://${PROJECT_ID}.supabase.co/functions/v1`;
@@ -102,14 +107,99 @@ const integrations: Integration[] = [
   },
 ];
 
+// Simple hash for demo — in production use a proper server-side hash
+function generateApiKey(): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let key = "crm_";
+  for (let i = 0; i < 40; i++) {
+    key += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return key;
+}
+
+async function simpleHash(text: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+interface ApiKeyRow {
+  id: string;
+  label: string;
+  key_prefix: string;
+  created_at: string;
+  last_used_at: string | null;
+}
+
 export default function IntegrationsPage() {
+  const { user } = useAuth();
   const [copied, setCopied] = useState<string | null>(null);
+  const [apiKeys, setApiKeys] = useState<ApiKeyRow[]>([]);
+  const [newKeyLabel, setNewKeyLabel] = useState("");
+  const [newKeyRevealed, setNewKeyRevealed] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+
+  const fetchKeys = useCallback(async () => {
+    const { data } = await supabase
+      .from("api_keys")
+      .select("id, label, key_prefix, created_at, last_used_at")
+      .order("created_at", { ascending: false });
+    setApiKeys((data as ApiKeyRow[]) || []);
+  }, []);
+
+  useEffect(() => {
+    fetchKeys();
+  }, [fetchKeys]);
 
   const copyText = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     setCopied(label);
     toast({ title: `${label} copied` });
     setTimeout(() => setCopied(null), 2000);
+  };
+
+  const handleCreateKey = async () => {
+    if (!newKeyLabel.trim()) {
+      toast({ title: "Please enter a label", variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    try {
+      const rawKey = generateApiKey();
+      const keyHash = await simpleHash(rawKey);
+      const keyPrefix = rawKey.slice(0, 10) + "...";
+
+      const { error } = await supabase.from("api_keys").insert({
+        label: newKeyLabel.trim(),
+        key_hash: keyHash,
+        key_prefix: keyPrefix,
+        created_by: user?.id,
+      });
+
+      if (error) throw error;
+
+      setNewKeyRevealed(rawKey);
+      setNewKeyLabel("");
+      fetchKeys();
+      toast({ title: "API key created" });
+    } catch (e: any) {
+      toast({ title: "Failed to create key", description: e.message, variant: "destructive" });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleDeleteKey = async (id: string) => {
+    const { error } = await supabase.from("api_keys").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Failed to delete key", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "API key deleted" });
+      fetchKeys();
+    }
   };
 
   const curlExample = (integration: Integration) =>
@@ -122,22 +212,130 @@ export default function IntegrationsPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold text-foreground">Integrations</h2>
-        <p className="text-sm text-muted-foreground">Connect external lead sources for automatic capture</p>
+        <p className="text-sm text-muted-foreground">Connect external lead sources and manage developer API keys</p>
       </div>
 
-      {/* API Key */}
+      {/* Developer API Keys Section */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Key className="h-4 w-4 text-primary" /> Developer API Keys
+            </CardTitle>
+            <Dialog open={createOpen} onOpenChange={(open) => { setCreateOpen(open); if (!open) { setNewKeyRevealed(null); setNewKeyLabel(""); } }}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="gap-1">
+                  <Plus className="h-3.5 w-3.5" /> Create Key
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New API Key</DialogTitle>
+                </DialogHeader>
+                {newKeyRevealed ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Copy this key now — it won't be shown again.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 rounded bg-muted px-3 py-2 text-xs font-mono text-foreground break-all">
+                        {newKeyRevealed}
+                      </code>
+                      <Button variant="outline" size="sm" onClick={() => copyText(newKeyRevealed, "API Key")}>
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                    <Button className="w-full" onClick={() => { setCreateOpen(false); setNewKeyRevealed(null); }}>
+                      Done
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <Input
+                      placeholder="Key label (e.g. 'Production', 'Staging')"
+                      value={newKeyLabel}
+                      onChange={(e) => setNewKeyLabel(e.target.value)}
+                    />
+                    <Button className="w-full" onClick={handleCreateKey} disabled={creating}>
+                      {creating ? "Creating..." : "Generate API Key"}
+                    </Button>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
+          </div>
+          <p className="text-sm text-muted-foreground">Create and manage API keys for external integrations</p>
+        </CardHeader>
+        <CardContent className="p-0">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-muted/50">
+                <th className="px-4 py-3 text-left text-muted-foreground font-medium">Label</th>
+                <th className="px-4 py-3 text-left text-muted-foreground font-medium">Key</th>
+                <th className="px-4 py-3 text-left text-muted-foreground font-medium">Created</th>
+                <th className="px-4 py-3 text-right text-muted-foreground font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {apiKeys.map((k) => (
+                <tr key={k.id} className="border-b last:border-0">
+                  <td className="px-4 py-3 font-medium text-foreground">{k.label}</td>
+                  <td className="px-4 py-3">
+                    <code className="rounded bg-muted px-2 py-0.5 text-xs font-mono text-muted-foreground">{k.key_prefix}</code>
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground text-xs">
+                    {new Date(k.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete API Key</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will permanently revoke the key "{k.label}". Any integrations using this key will stop working.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDeleteKey(k.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </td>
+                </tr>
+              ))}
+              {apiKeys.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
+                    No API keys yet. Create one to get started.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
+
+      {/* Default Platform Key */}
       <Card className="border-primary/20">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-foreground">API Key</p>
-              <p className="text-xs text-muted-foreground">Include as <code className="text-xs">apikey</code> header in all requests</p>
+              <p className="text-sm font-medium text-foreground">Platform API Key</p>
+              <p className="text-xs text-muted-foreground">Default key for webhook integrations. Include as <code className="text-xs">apikey</code> header.</p>
             </div>
             <div className="flex items-center gap-2">
               <code className="rounded bg-muted px-2 py-1 text-xs font-mono text-foreground">
                 {ANON_KEY ? ANON_KEY.slice(0, 24) + "..." : "Not configured"}
               </code>
-              <Button variant="outline" size="sm" onClick={() => copyText(ANON_KEY, "API Key")}>
+              <Button variant="outline" size="sm" onClick={() => copyText(ANON_KEY, "Platform Key")}>
                 <Copy className="h-3 w-3" />
               </Button>
             </div>
@@ -170,7 +368,6 @@ export default function IntegrationsPage() {
                 <p className="text-sm text-muted-foreground">{integration.description}</p>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Webhook URL */}
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-1">Webhook URL</p>
                   <div className="flex items-center gap-2">
@@ -183,7 +380,6 @@ export default function IntegrationsPage() {
                   </div>
                 </div>
 
-                {/* Setup Steps */}
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-2">Setup Steps</p>
                   <ol className="space-y-1.5">
@@ -196,7 +392,6 @@ export default function IntegrationsPage() {
                   </ol>
                 </div>
 
-                {/* Provider Links */}
                 {integration.providerLinks && (
                   <div>
                     <p className="text-xs font-medium text-muted-foreground mb-1">Platforms & Providers</p>
@@ -212,7 +407,6 @@ export default function IntegrationsPage() {
                   </div>
                 )}
 
-                {/* Sample Payload */}
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-1">Sample Payload</p>
                   <div className="relative">
@@ -223,7 +417,6 @@ export default function IntegrationsPage() {
                   </div>
                 </div>
 
-                {/* cURL Example */}
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-1">cURL Example</p>
                   <div className="relative">
@@ -236,7 +429,6 @@ export default function IntegrationsPage() {
               </CardContent>
             </Card>
 
-            {/* No-Code Alternative */}
             <Card className="border-dashed">
               <CardContent className="flex items-center gap-3 p-4">
                 <Zap className="h-5 w-5 text-amber-500 shrink-0" />

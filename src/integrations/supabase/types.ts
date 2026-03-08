@@ -49,6 +49,36 @@ export type Database = {
           },
         ]
       }
+      api_keys: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          key_hash: string
+          key_prefix: string
+          label: string
+          last_used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          key_hash: string
+          key_prefix: string
+          label?: string
+          last_used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          key_hash?: string
+          key_prefix?: string
+          label?: string
+          last_used_at?: string | null
+        }
+        Relationships: []
+      }
       assignment_settings: {
         Row: {
           id: string
