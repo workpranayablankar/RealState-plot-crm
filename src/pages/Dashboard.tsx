@@ -34,6 +34,18 @@ export default function Dashboard() {
         const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, email");
         setAgents(profiles || []);
       }
+
+      // Telecaller: fetch calls made today
+      if (role === "telecaller") {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const { count } = await supabase
+          .from("call_history")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user?.id)
+          .gte("call_date", todayStart.toISOString());
+        setCallsToday(count || 0);
+      }
     };
     if (user) fetchData();
   }, [user, role]);
