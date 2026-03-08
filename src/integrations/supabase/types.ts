@@ -49,6 +49,27 @@ export type Database = {
           },
         ]
       }
+      assignment_settings: {
+        Row: {
+          id: string
+          last_assigned_index: number
+          method: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          last_assigned_index?: number
+          method?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          last_assigned_index?: number
+          method?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       follow_ups: {
         Row: {
           assigned_agent: string
@@ -89,6 +110,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      lead_sources: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          sort_order?: number
+        }
+        Relationships: []
       }
       lead_statuses: {
         Row: {

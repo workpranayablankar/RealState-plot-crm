@@ -17,6 +17,9 @@ import SettingsPage from "./pages/settings/SettingsPage";
 import UserManagementPage from "./pages/settings/UserManagementPage";
 import RolesPermissionsPage from "./pages/settings/RolesPermissionsPage";
 import LeadStatusSetupPage from "./pages/settings/LeadStatusSetupPage";
+import LeadSourcesPage from "./pages/settings/LeadSourcesPage";
+import PlotSettingsPage from "./pages/settings/PlotSettingsPage";
+import LeadAssignmentPage from "./pages/settings/LeadAssignmentPage";
 import SettingsPlaceholder from "./pages/settings/SettingsPlaceholder";
 import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
@@ -51,9 +54,9 @@ function AppRoutes() {
         <Route path="users" element={<UserManagementPage />} />
         <Route path="roles" element={<RolesPermissionsPage />} />
         <Route path="lead-statuses" element={<LeadStatusSetupPage />} />
-        <Route path="lead-sources" element={<SettingsPlaceholder />} />
-        <Route path="plots" element={<SettingsPlaceholder />} />
-        <Route path="assignment" element={<SettingsPlaceholder />} />
+        <Route path="lead-sources" element={<LeadSourcesPage />} />
+        <Route path="plots" element={<PlotSettingsPage />} />
+        <Route path="assignment" element={<LeadAssignmentPage />} />
         <Route path="integrations" element={<SettingsPlaceholder />} />
         <Route path="notifications" element={<SettingsPlaceholder />} />
         <Route path="import-export" element={<SettingsPlaceholder />} />
