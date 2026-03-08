@@ -45,19 +45,27 @@ export default function ReportsPage() {
     return d >= lmStart && d <= lmEnd;
   });
 
-  // Agent performance
-  const agentReport = agents.map((a) => {
-    const al = leads.filter((l) => l.assigned_agent === a.user_id);
-    const closed = al.filter((l) => l.status === "Deal Closed").length;
-    const siteVisits = al.filter((l) => l.status === "Site Visit Scheduled").length;
-    return {
-      name: a.full_name,
-      total: al.length,
-      closed,
-      siteVisits,
-      rate: al.length > 0 ? ((closed / al.length) * 100).toFixed(1) : "0",
-    };
-  }).sort((a, b) => b.closed - a.closed);
+  const getRoleFor = (userId: string) => roles.find(r => r.user_id === userId)?.role || "agent";
+
+  const buildReport = (role: string) =>
+    agents
+      .filter((a) => getRoleFor(a.user_id) === role)
+      .map((a) => {
+        const al = leads.filter((l) => l.assigned_agent === a.user_id);
+        const closed = al.filter((l) => l.status === "Deal Closed").length;
+        const siteVisits = al.filter((l) => l.status === "Site Visit Scheduled").length;
+        return {
+          name: a.full_name,
+          total: al.length,
+          closed,
+          siteVisits,
+          rate: al.length > 0 ? ((closed / al.length) * 100).toFixed(1) : "0",
+        };
+      })
+      .sort((a, b) => b.closed - a.closed);
+
+  const agentReport = buildReport("agent");
+  const telecallerReport = buildReport("telecaller");
 
   // Source report
   const sourceReport = SOURCES.map((s) => {
