@@ -112,14 +112,19 @@ export default function AddLeadPage() {
   return (
     <AppLayout>
       <div className="max-w-2xl mx-auto space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <UserPlus className="h-6 w-6 text-primary" />
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <UserPlus className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Add New Lead</h1>
+              <p className="text-sm text-muted-foreground">Fill in the details to create a new lead</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Add New Lead</h1>
-            <p className="text-sm text-muted-foreground">Fill in the details to create a new lead</p>
-          </div>
+          <Button variant="outline" onClick={() => setImportOpen(true)}>
+            <Upload className="h-4 w-4 mr-2" /> Import Leads (CSV)
+          </Button>
         </div>
 
         <Card>
