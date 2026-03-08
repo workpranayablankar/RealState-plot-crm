@@ -25,6 +25,8 @@ export default function AddLeadPage() {
   const [plots, setPlots] = useState<{ id: string; plot_name: string; plot_no: string }[]>([]);
   const [plotOpen, setPlotOpen] = useState(false);
   const [plotSearch, setPlotSearch] = useState("");
+  const [agentOpen, setAgentOpen] = useState(false);
+  const [agentSearch, setAgentSearch] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -32,7 +34,7 @@ export default function AddLeadPage() {
   const [form, setForm] = useState({
     name: "", phone: "", email: "", location: "", address: "", budget: "",
     property_interest: "", source: "" as typeof SOURCES[number] | "",
-    assigned_agent: "", notes: "", interested_plot: "", interested_plot_label: "",
+    assigned_agent: "", assigned_agent_label: "", notes: "", interested_plot: "", interested_plot_label: "",
   });
 
   useEffect(() => {
@@ -49,6 +51,12 @@ export default function AddLeadPage() {
       p.plot_name.toLowerCase().includes(q) || p.plot_no.toLowerCase().includes(q)
     );
   }, [plots, plotSearch]);
+
+  const filteredAgents = useMemo(() => {
+    if (!agentSearch) return agents;
+    const q = agentSearch.toLowerCase();
+    return agents.filter(a => a.full_name.toLowerCase().includes(q));
+  }, [agents, agentSearch]);
 
   const validate = () => {
     const errs: Record<string, string> = {};
@@ -278,12 +286,69 @@ export default function AddLeadPage() {
                 {role === "admin" && (
                   <div className="space-y-1.5">
                     <Label>Assign Agent</Label>
-                    <Select value={form.assigned_agent} onValueChange={(v) => setField("assigned_agent", v)}>
-                      <SelectTrigger><SelectValue placeholder="Auto-assign" /></SelectTrigger>
-                      <SelectContent>
-                        {agents.map((a) => <SelectItem key={a.user_id} value={a.user_id}>{a.full_name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <Popover open={agentOpen} onOpenChange={setAgentOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={agentOpen}
+                          className="w-full justify-between font-normal"
+                        >
+                          {form.assigned_agent_label || "Search or type agent..."}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0" align="start">
+                        <Command>
+                          <CommandInput
+                            placeholder="Search agent..."
+                            value={agentSearch}
+                            onValueChange={setAgentSearch}
+                          />
+                          <CommandList>
+                            <CommandEmpty>
+                              {agentSearch && (
+                                <button
+                                  type="button"
+                                  className="w-full px-4 py-2 text-sm text-left hover:bg-accent cursor-pointer"
+                                  onClick={() => {
+                                    setForm(prev => ({
+                                      ...prev,
+                                      assigned_agent: "",
+                                      assigned_agent_label: agentSearch,
+                                    }));
+                                    setAgentOpen(false);
+                                    setAgentSearch("");
+                                  }}
+                                >
+                                  Use custom: "<span className="font-medium">{agentSearch}</span>"
+                                </button>
+                              )}
+                            </CommandEmpty>
+                            <CommandGroup>
+                              {filteredAgents.map((a) => (
+                                <CommandItem
+                                  key={a.user_id}
+                                  value={a.full_name}
+                                  onSelect={() => {
+                                    setForm(prev => ({
+                                      ...prev,
+                                      assigned_agent: a.user_id,
+                                      assigned_agent_label: a.full_name,
+                                    }));
+                                    setAgentOpen(false);
+                                    setAgentSearch("");
+                                  }}
+                                >
+                                  <Check className={cn("mr-2 h-4 w-4", form.assigned_agent === a.user_id ? "opacity-100" : "opacity-0")} />
+                                  {a.full_name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 )}
               </div>
