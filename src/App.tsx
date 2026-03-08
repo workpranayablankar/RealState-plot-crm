@@ -21,7 +21,9 @@ import LeadSourcesPage from "./pages/settings/LeadSourcesPage";
 import PlotSettingsPage from "./pages/settings/PlotSettingsPage";
 import LeadAssignmentPage from "./pages/settings/LeadAssignmentPage";
 import IntegrationsPage from "./pages/settings/IntegrationsPage";
-import SettingsPlaceholder from "./pages/settings/SettingsPlaceholder";
+import NotificationSettingsPage from "./pages/settings/NotificationSettingsPage";
+import ImportExportPage from "./pages/settings/ImportExportPage";
+import SystemPreferencesPage from "./pages/settings/SystemPreferencesPage";
 import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
 
