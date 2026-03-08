@@ -67,7 +67,7 @@ export default function LeadAssignmentPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold text-foreground">Lead Assignment Rules</h2>
-        <p className="text-sm text-muted-foreground">Configure how new leads are distributed to agents</p>
+        <p className="text-sm text-muted-foreground">Configure how new leads are distributed to agents and telecallers</p>
       </div>
 
       <Card>
