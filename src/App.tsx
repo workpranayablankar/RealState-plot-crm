@@ -15,6 +15,8 @@ import ActivitiesPage from "./pages/ActivitiesPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import SettingsPage from "./pages/settings/SettingsPage";
 import UserManagementPage from "./pages/settings/UserManagementPage";
+import RolesPermissionsPage from "./pages/settings/RolesPermissionsPage";
+import LeadStatusSetupPage from "./pages/settings/LeadStatusSetupPage";
 import SettingsPlaceholder from "./pages/settings/SettingsPlaceholder";
 import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
@@ -47,8 +49,8 @@ function AppRoutes() {
       <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute adminOnly><SettingsPage /></ProtectedRoute>}>
         <Route path="users" element={<UserManagementPage />} />
-        <Route path="roles" element={<SettingsPlaceholder />} />
-        <Route path="lead-statuses" element={<SettingsPlaceholder />} />
+        <Route path="roles" element={<RolesPermissionsPage />} />
+        <Route path="lead-statuses" element={<LeadStatusSetupPage />} />
         <Route path="lead-sources" element={<SettingsPlaceholder />} />
         <Route path="plots" element={<SettingsPlaceholder />} />
         <Route path="assignment" element={<SettingsPlaceholder />} />

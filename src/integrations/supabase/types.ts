@@ -90,6 +90,30 @@ export type Database = {
           },
         ]
       }
+      lead_statuses: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          label: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           assigned_agent: string | null
@@ -232,6 +256,8 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          is_active: boolean
+          phone: string
           user_id: string
         }
         Insert: {
@@ -239,6 +265,8 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          is_active?: boolean
+          phone?: string
           user_id: string
         }
         Update: {
@@ -246,6 +274,8 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          is_active?: boolean
+          phone?: string
           user_id?: string
         }
         Relationships: []
