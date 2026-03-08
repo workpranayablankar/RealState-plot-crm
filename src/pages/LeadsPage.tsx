@@ -67,6 +67,16 @@ export default function LeadsPage() {
     fetchLeads();
   };
 
+  const markLeadStatus = async (id: string, status: LeadStatus) => {
+    await supabase.from("leads").update({
+      status,
+      contacted_by: user?.id,
+      contacted_at: new Date().toISOString(),
+    } as any).eq("id", id);
+    toast({ title: `Lead marked as ${status}` });
+    fetchLeads();
+  };
+
   const deleteLead = async (id: string) => {
     await supabase.from("leads").delete().eq("id", id);
     setSelectedId(null);
