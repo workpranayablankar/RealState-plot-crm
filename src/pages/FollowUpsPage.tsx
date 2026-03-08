@@ -78,6 +78,12 @@ export default function FollowUpsPage() {
     fetchData();
   };
 
+  const deleteFollowUp = async (id: string) => {
+    await supabase.from("follow_ups").delete().eq("id", id);
+    toast({ title: "Follow-up deleted" });
+    fetchData();
+  };
+
   const handleAdd = async () => {
     if (!form.lead_id || !form.follow_up_date) {
       toast({ title: "Please select a lead and date", variant: "destructive" });
