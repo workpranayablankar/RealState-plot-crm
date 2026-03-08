@@ -17,6 +17,7 @@ export default function Dashboard() {
   const [agents, setAgents] = useState<any[]>([]);
   const [followUps, setFollowUps] = useState<any[]>([]);
   const [callsToday, setCallsToday] = useState(0);
+  const [profiles, setProfiles] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
