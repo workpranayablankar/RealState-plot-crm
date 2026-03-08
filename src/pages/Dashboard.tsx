@@ -33,8 +33,9 @@ export default function Dashboard() {
       setFollowUps(fuData || []);
 
       if (role === "admin") {
-        const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, email");
-        setAgents(profiles || []);
+        const { data: profilesData } = await supabase.from("profiles").select("user_id, full_name, email");
+        setAgents(profilesData || []);
+        setProfiles(profilesData || []);
       }
 
       // Telecaller: fetch calls made today
