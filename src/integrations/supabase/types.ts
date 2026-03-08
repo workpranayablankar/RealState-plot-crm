@@ -218,6 +218,33 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          email: boolean
+          event_type: string
+          id: string
+          in_app: boolean
+          sms: boolean
+          updated_at: string
+        }
+        Insert: {
+          email?: boolean
+          event_type: string
+          id?: string
+          in_app?: boolean
+          sms?: boolean
+          updated_at?: string
+        }
+        Update: {
+          email?: boolean
+          event_type?: string
+          id?: string
+          in_app?: boolean
+          sms?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -322,6 +349,39 @@ export type Database = {
           is_active?: boolean
           phone?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      system_preferences: {
+        Row: {
+          company_name: string
+          currency: string
+          date_format: string
+          default_assignment: string
+          default_lead_status: string
+          id: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string
+          currency?: string
+          date_format?: string
+          default_assignment?: string
+          default_lead_status?: string
+          id?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string
+          currency?: string
+          date_format?: string
+          default_assignment?: string
+          default_lead_status?: string
+          id?: string
+          timezone?: string
+          updated_at?: string
         }
         Relationships: []
       }

@@ -21,7 +21,9 @@ import LeadSourcesPage from "./pages/settings/LeadSourcesPage";
 import PlotSettingsPage from "./pages/settings/PlotSettingsPage";
 import LeadAssignmentPage from "./pages/settings/LeadAssignmentPage";
 import IntegrationsPage from "./pages/settings/IntegrationsPage";
-import SettingsPlaceholder from "./pages/settings/SettingsPlaceholder";
+import NotificationSettingsPage from "./pages/settings/NotificationSettingsPage";
+import ImportExportPage from "./pages/settings/ImportExportPage";
+import SystemPreferencesPage from "./pages/settings/SystemPreferencesPage";
 import LoginPage from "./pages/LoginPage";
 import NotFound from "./pages/NotFound";
 
@@ -59,9 +61,9 @@ function AppRoutes() {
         <Route path="plots" element={<PlotSettingsPage />} />
         <Route path="assignment" element={<LeadAssignmentPage />} />
         <Route path="integrations" element={<IntegrationsPage />} />
-        <Route path="notifications" element={<SettingsPlaceholder />} />
-        <Route path="import-export" element={<SettingsPlaceholder />} />
-        <Route path="preferences" element={<SettingsPlaceholder />} />
+        <Route path="notifications" element={<NotificationSettingsPage />} />
+        <Route path="import-export" element={<ImportExportPage />} />
+        <Route path="preferences" element={<SystemPreferencesPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
