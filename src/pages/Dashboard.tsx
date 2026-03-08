@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Users, TrendingUp, CheckCircle, Clock, MapPin, CalendarClock, UserPlus, BarChart3, Phone, PhoneCall } from "lucide-react";
-import { isToday } from "date-fns";
+import { isToday, formatDistanceToNow } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 const STATUSES = ["New Lead", "Contacted", "Interested", "Site Visit Scheduled", "Negotiation", "Deal Closed", "Not Interested"] as const;
 const SOURCES = ["Website", "Facebook Ads", "Google Ads", "Manual"] as const;
