@@ -229,8 +229,9 @@ export default function UserManagementPage() {
                           <Select value={editRole} onValueChange={(v) => setEditRole(v as AppRole)}>
                             <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="admin">Admin</SelectItem>
-                              <SelectItem value="agent">Agent</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="agent">Agent</SelectItem>
+                            <SelectItem value="telecaller">Telecaller</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
