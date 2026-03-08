@@ -25,6 +25,7 @@ import NotificationSettingsPage from "./pages/settings/NotificationSettingsPage"
 import ImportExportPage from "./pages/settings/ImportExportPage";
 import SystemPreferencesPage from "./pages/settings/SystemPreferencesPage";
 import LoginPage from "./pages/LoginPage";
+import CallHistoryPage from "./pages/CallHistoryPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
