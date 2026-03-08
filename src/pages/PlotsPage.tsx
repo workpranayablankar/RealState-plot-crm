@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Edit, MapPin } from "lucide-react";
+import { Plus, Edit, MapPin, Download, Upload } from "lucide-react";
 
 type PlotStatus = "Available" | "Booked" | "Sold";
 
