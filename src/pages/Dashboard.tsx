@@ -20,7 +20,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       let query = supabase.from("leads").select("*");
-      if (role === "agent") query = query.eq("assigned_agent", user?.id);
+      if (role === "agent" || role === "telecaller") query = query.eq("assigned_agent", user?.id);
       const { data } = await query;
       setLeads(data || []);
 
