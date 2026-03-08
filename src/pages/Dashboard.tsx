@@ -58,7 +58,18 @@ export default function Dashboard() {
   const conversionRate = total > 0 ? ((closed / total) * 100).toFixed(1) : "0";
   const todayFollowUps = followUps.filter((f) => isToday(new Date(f.follow_up_date))).length;
 
-  const summaryCards = [
+  const interested = leads.filter((l) => l.status === "Interested").length;
+
+  const telecallerCards = [
+    { label: "My Leads", value: total, icon: Users, color: "text-primary", bg: "bg-primary/10" },
+    { label: "New Leads Today", value: newToday, icon: UserPlus, color: "text-info", bg: "bg-info/10" },
+    { label: "Calls Made Today", value: callsToday, icon: PhoneCall, color: "text-success", bg: "bg-success/10" },
+    { label: "Follow Ups Today", value: todayFollowUps, icon: CalendarClock, color: "text-warning", bg: "bg-warning/10" },
+    { label: "Interested Leads", value: interested, icon: TrendingUp, color: "text-primary", bg: "bg-primary/10" },
+    { label: "Site Visits", value: siteVisits, icon: MapPin, color: "text-info", bg: "bg-info/10" },
+  ];
+
+  const adminAgentCards = [
     { label: "Total Leads", value: total, icon: Users, color: "text-primary", bg: "bg-primary/10" },
     { label: "New Today", value: newToday, icon: UserPlus, color: "text-info", bg: "bg-info/10" },
     { label: "Site Visits", value: siteVisits, icon: MapPin, color: "text-warning", bg: "bg-warning/10" },
@@ -67,6 +78,8 @@ export default function Dashboard() {
     { label: "New Leads", value: newLeads, icon: Clock, color: "text-info", bg: "bg-info/10" },
     { label: "Follow Ups Today", value: todayFollowUps, icon: CalendarClock, color: "text-warning", bg: "bg-warning/10" },
   ];
+
+  const summaryCards = role === "telecaller" ? telecallerCards : adminAgentCards;
 
   const statusCounts = STATUSES.map((s) => ({
     status: s,
