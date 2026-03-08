@@ -209,6 +209,45 @@ export default function Dashboard() {
             </Card>
           )}
         </div>
+
+        {/* Recent Contacted by Telecallers */}
+        {role === "admin" && recentContacted.length > 0 && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold">Recently Contacted by Telecallers</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">Lead Name</th>
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">Status</th>
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">Marked By</th>
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">When</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentContacted.map((l) => (
+                      <tr key={l.id} className="border-b last:border-0">
+                        <td className="px-4 py-2 font-medium text-foreground">{l.name}</td>
+                        <td className="px-4 py-2">
+                          <Badge variant={l.status === "Contacted" ? "default" : "destructive"} className="text-xs">
+                            {l.status}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-2 text-muted-foreground">{getProfileName(l.contacted_by)}</td>
+                        <td className="px-4 py-2 text-muted-foreground text-xs">
+                          {formatDistanceToNow(new Date(l.contacted_at), { addSuffix: true })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </AppLayout>
   );
