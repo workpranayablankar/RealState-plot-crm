@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Users, TrendingUp, CheckCircle, Clock, MapPin, CalendarClock, UserPlus, BarChart3 } from "lucide-react";
+import { Users, TrendingUp, CheckCircle, Clock, MapPin, CalendarClock, UserPlus, BarChart3, Phone, PhoneCall } from "lucide-react";
 import { isToday } from "date-fns";
 
 const STATUSES = ["New Lead", "Contacted", "Interested", "Site Visit Scheduled", "Negotiation", "Deal Closed", "Not Interested"] as const;
@@ -15,6 +15,7 @@ export default function Dashboard() {
   const [leads, setLeads] = useState<any[]>([]);
   const [agents, setAgents] = useState<any[]>([]);
   const [followUps, setFollowUps] = useState<any[]>([]);
+  const [callsToday, setCallsToday] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
