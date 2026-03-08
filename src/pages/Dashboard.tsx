@@ -103,6 +103,18 @@ export default function Dashboard() {
     return { ...a, totalLeads: agentLeads.length, closed: agentClosed, visits: agentVisits };
   }).sort((a, b) => b.closed - a.closed) : [];
 
+  const getProfileName = (userId: string | null) => {
+    if (!userId) return "Unknown";
+    return profiles.find((p) => p.user_id === userId)?.full_name || "Unknown";
+  };
+
+  const recentContacted = role === "admin"
+    ? leads
+        .filter((l) => l.contacted_by && l.contacted_at)
+        .sort((a, b) => new Date(b.contacted_at).getTime() - new Date(a.contacted_at).getTime())
+        .slice(0, 10)
+    : [];
+
   return (
     <AppLayout>
       <div className="space-y-6">
