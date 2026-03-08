@@ -111,11 +111,18 @@ export default function LeadsPage() {
             <h1 className="text-2xl font-bold text-foreground">Leads</h1>
             <p className="text-sm text-muted-foreground">{filtered.length} leads found</p>
           </div>
-          {role === "admin" && (
-            <Button variant="outline" onClick={exportCSV}>
-              <Download className="mr-2 h-4 w-4" />Export CSV
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {role === "admin" && (
+              <Button variant="outline" onClick={exportCSV}>
+                <Download className="mr-2 h-4 w-4" />Export CSV
+              </Button>
+            )}
+            {role === "telecaller" && selectedLead && (
+              <Button variant="outline" asChild>
+                <a href={`tel:${selectedLead.phone}`}><Phone className="mr-2 h-4 w-4" />Call Now</a>
+              </Button>
+            )}
+          </div>
         </div>
 
         <Card>
