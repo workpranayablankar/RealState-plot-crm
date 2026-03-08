@@ -148,7 +148,35 @@ export default function ReportsPage() {
                       <td className="px-4 py-3 text-foreground">{a.rate}%</td>
                     </tr>
                   ))}
-                  {agentReport.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No data</td></tr>}
+                  {agentReport.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No agents</td></tr>}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
+
+          {/* Telecaller Performance */}
+          <Card>
+            <CardHeader><CardTitle className="text-base">Telecaller Performance</CardTitle></CardHeader>
+            <CardContent className="p-0">
+              <table className="w-full text-sm">
+                <thead><tr className="border-b bg-muted/50">
+                  <th className="px-4 py-3 text-left text-muted-foreground font-medium">Telecaller</th>
+                  <th className="px-4 py-3 text-left text-muted-foreground font-medium">Leads</th>
+                  <th className="px-4 py-3 text-left text-muted-foreground font-medium">Visits</th>
+                  <th className="px-4 py-3 text-left text-muted-foreground font-medium">Closed</th>
+                  <th className="px-4 py-3 text-left text-muted-foreground font-medium">Rate</th>
+                </tr></thead>
+                <tbody>
+                  {telecallerReport.map((a) => (
+                    <tr key={a.name} className="border-b last:border-0">
+                      <td className="px-4 py-3 font-medium text-foreground">{a.name}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{a.total}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{a.siteVisits}</td>
+                      <td className="px-4 py-3 text-success font-medium">{a.closed}</td>
+                      <td className="px-4 py-3 text-foreground">{a.rate}%</td>
+                    </tr>
+                  ))}
+                  {telecallerReport.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No telecallers</td></tr>}
                 </tbody>
               </table>
             </CardContent>
