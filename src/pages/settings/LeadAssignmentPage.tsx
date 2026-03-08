@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { RefreshCw, UserPlus, Users } from "lucide-react";
+import { RefreshCw, UserPlus, Users, Phone } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
-interface Agent {
+interface UserWithRole {
   user_id: string;
   full_name: string;
   email: string;
+  role: string;
 }
 
 export default function LeadAssignmentPage() {
