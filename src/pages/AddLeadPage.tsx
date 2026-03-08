@@ -31,6 +31,8 @@ export default function AddLeadPage() {
     }
   }, [role]);
 
+  const { user } = useAuth();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.phone) {
