@@ -505,6 +505,7 @@ export type Database = {
         | "Referral"
         | "Direct Call"
         | "Other"
+        | "Agent"
       lead_status:
         | "New Lead"
         | "Contacted"
@@ -652,6 +653,7 @@ export const Constants = {
         "Referral",
         "Direct Call",
         "Other",
+        "Agent",
       ],
       lead_status: [
         "New Lead",
