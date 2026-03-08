@@ -192,14 +192,9 @@ export default function LeadsPage() {
                               <a href={`tel:${lead.phone}`}><Phone className="h-4 w-4 text-success" /></a>
                             </Button>
                             {lead.status === "New Lead" && (
-                              <>
-                                <Button variant="ghost" size="sm" title="Mark Contacted" onClick={() => markLeadStatus(lead.id, "Contacted")}>
-                                  <CheckCircle className="h-4 w-4 text-primary" />
-                                </Button>
-                                <Button variant="ghost" size="sm" title="Mark Not Interested" onClick={() => markLeadStatus(lead.id, "Not Interested")}>
-                                  <XCircle className="h-4 w-4 text-destructive" />
-                                </Button>
-                              </>
+                              <Button variant="ghost" size="sm" title="Mark Contacted" onClick={() => markLeadStatus(lead.id, "Contacted")}>
+                                <CheckCircle className="h-4 w-4 text-primary" />
+                              </Button>
                             )}
                           </>
                         )}
