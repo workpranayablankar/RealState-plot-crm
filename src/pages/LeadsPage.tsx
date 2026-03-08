@@ -167,8 +167,13 @@ export default function LeadsPage() {
                       {role === "admin" && <td className="px-4 py-3 text-muted-foreground">{getAgentName(lead.assigned_agent)}</td>}
                       <td className="px-4 py-3"><span className={`status-badge ${statusClass[lead.status]}`}>{lead.status}</span></td>
                       <td className="px-4 py-3 font-medium text-foreground">{lead.budget}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 flex items-center gap-1">
                         <Button variant="ghost" size="sm" onClick={() => setSelectedId(lead.id)}><Eye className="h-4 w-4" /></Button>
+                        {role === "admin" && (
+                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => deleteLead(lead.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   ))}
