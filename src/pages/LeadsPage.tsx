@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Search, Eye, Download, Trash2, Phone } from "lucide-react";
+import { Search, Eye, Download, Trash2, Phone, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -64,6 +64,16 @@ export default function LeadsPage() {
 
   const updateLead = async (id: string, updates: Partial<Lead>) => {
     await supabase.from("leads").update(updates).eq("id", id);
+    fetchLeads();
+  };
+
+  const markLeadStatus = async (id: string, status: LeadStatus) => {
+    await supabase.from("leads").update({
+      status,
+      contacted_by: user?.id,
+      contacted_at: new Date().toISOString(),
+    } as any).eq("id", id);
+    toast({ title: `Lead marked as ${status}` });
     fetchLeads();
   };
 
@@ -177,9 +187,21 @@ export default function LeadsPage() {
                       <td className="px-4 py-3 flex items-center gap-1">
                         <Button variant="ghost" size="sm" onClick={() => setSelectedId(lead.id)}><Eye className="h-4 w-4" /></Button>
                         {role === "telecaller" && (
-                          <Button variant="ghost" size="sm" asChild>
-                            <a href={`tel:${lead.phone}`}><Phone className="h-4 w-4 text-success" /></a>
-                          </Button>
+                          <>
+                            <Button variant="ghost" size="sm" asChild>
+                              <a href={`tel:${lead.phone}`}><Phone className="h-4 w-4 text-success" /></a>
+                            </Button>
+                            {lead.status === "New Lead" && (
+                              <>
+                                <Button variant="ghost" size="sm" title="Mark Contacted" onClick={() => markLeadStatus(lead.id, "Contacted")}>
+                                  <CheckCircle className="h-4 w-4 text-primary" />
+                                </Button>
+                                <Button variant="ghost" size="sm" title="Mark Not Interested" onClick={() => markLeadStatus(lead.id, "Not Interested")}>
+                                  <XCircle className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </>
+                            )}
+                          </>
                         )}
                         {role === "admin" && (
                           <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => deleteLead(lead.id)}>

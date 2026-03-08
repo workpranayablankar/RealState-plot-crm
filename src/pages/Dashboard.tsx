@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Users, TrendingUp, CheckCircle, Clock, MapPin, CalendarClock, UserPlus, BarChart3, Phone, PhoneCall } from "lucide-react";
-import { isToday } from "date-fns";
+import { isToday, formatDistanceToNow } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 const STATUSES = ["New Lead", "Contacted", "Interested", "Site Visit Scheduled", "Negotiation", "Deal Closed", "Not Interested"] as const;
 const SOURCES = ["Website", "Facebook Ads", "Google Ads", "Manual"] as const;
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const [agents, setAgents] = useState<any[]>([]);
   const [followUps, setFollowUps] = useState<any[]>([]);
   const [callsToday, setCallsToday] = useState(0);
+  const [profiles, setProfiles] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,8 +33,9 @@ export default function Dashboard() {
       setFollowUps(fuData || []);
 
       if (role === "admin") {
-        const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, email");
-        setAgents(profiles || []);
+        const { data: profilesData } = await supabase.from("profiles").select("user_id, full_name, email");
+        setAgents(profilesData || []);
+        setProfiles(profilesData || []);
       }
 
       // Telecaller: fetch calls made today
@@ -99,6 +102,18 @@ export default function Dashboard() {
     const agentVisits = agentLeads.filter((l) => l.status === "Site Visit Scheduled").length;
     return { ...a, totalLeads: agentLeads.length, closed: agentClosed, visits: agentVisits };
   }).sort((a, b) => b.closed - a.closed) : [];
+
+  const getProfileName = (userId: string | null) => {
+    if (!userId) return "Unknown";
+    return profiles.find((p) => p.user_id === userId)?.full_name || "Unknown";
+  };
+
+  const recentContacted = role === "admin"
+    ? leads
+        .filter((l) => l.contacted_by && l.contacted_at)
+        .sort((a, b) => new Date(b.contacted_at).getTime() - new Date(a.contacted_at).getTime())
+        .slice(0, 10)
+    : [];
 
   return (
     <AppLayout>
@@ -194,6 +209,45 @@ export default function Dashboard() {
             </Card>
           )}
         </div>
+
+        {/* Recent Contacted by Telecallers */}
+        {role === "admin" && recentContacted.length > 0 && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold">Recently Contacted by Telecallers</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">Lead Name</th>
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">Status</th>
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">Marked By</th>
+                      <th className="px-4 py-2 text-left font-medium text-muted-foreground">When</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentContacted.map((l) => (
+                      <tr key={l.id} className="border-b last:border-0">
+                        <td className="px-4 py-2 font-medium text-foreground">{l.name}</td>
+                        <td className="px-4 py-2">
+                          <Badge variant={l.status === "Contacted" ? "default" : "destructive"} className="text-xs">
+                            {l.status}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-2 text-muted-foreground">{getProfileName(l.contacted_by)}</td>
+                        <td className="px-4 py-2 text-muted-foreground text-xs">
+                          {formatDistanceToNow(new Date(l.contacted_at), { addSuffix: true })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </AppLayout>
   );

@@ -232,6 +232,8 @@ export type Database = {
           address: string | null
           assigned_agent: string | null
           budget: string | null
+          contacted_at: string | null
+          contacted_by: string | null
           created_at: string
           email: string | null
           id: string
@@ -249,6 +251,8 @@ export type Database = {
           address?: string | null
           assigned_agent?: string | null
           budget?: string | null
+          contacted_at?: string | null
+          contacted_by?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -266,6 +270,8 @@ export type Database = {
           address?: string | null
           assigned_agent?: string | null
           budget?: string | null
+          contacted_at?: string | null
+          contacted_by?: string | null
           created_at?: string
           email?: string | null
           id?: string
