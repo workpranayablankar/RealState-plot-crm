@@ -142,7 +142,16 @@ export default function PlotsPage() {
             <h1 className="text-2xl font-bold text-foreground">Plots / Properties</h1>
             <p className="text-sm text-muted-foreground">{plots.length} plots total</p>
           </div>
-          <Button onClick={openNew}><Plus className="mr-2 h-4 w-4" />Add Plot</Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={exportCSV}><Download className="mr-2 h-4 w-4" />Export CSV</Button>
+            <Button variant="outline" asChild>
+              <label className="cursor-pointer">
+                <Upload className="mr-2 h-4 w-4" />{importing ? "Importing..." : "Import CSV"}
+                <input type="file" accept=".csv" className="hidden" onChange={importCSV} disabled={importing} />
+              </label>
+            </Button>
+            <Button onClick={openNew}><Plus className="mr-2 h-4 w-4" />Add Plot</Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
