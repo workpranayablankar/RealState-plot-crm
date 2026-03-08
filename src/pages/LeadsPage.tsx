@@ -38,7 +38,7 @@ export default function LeadsPage() {
 
   const fetchLeads = async () => {
     let query = supabase.from("leads").select("*").order("created_at", { ascending: false });
-    if (role === "agent") query = query.eq("assigned_agent", user?.id);
+    if (role === "agent" || role === "telecaller") query = query.eq("assigned_agent", user?.id);
     const { data } = await query;
     setLeads(data || []);
   };
