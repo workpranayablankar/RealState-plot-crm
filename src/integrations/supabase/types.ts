@@ -70,6 +70,44 @@ export type Database = {
         }
         Relationships: []
       }
+      call_history: {
+        Row: {
+          call_date: string
+          created_at: string
+          duration: string | null
+          id: string
+          lead_id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          call_date?: string
+          created_at?: string
+          duration?: string | null
+          id?: string
+          lead_id: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          call_date?: string
+          created_at?: string
+          duration?: string | null
+          id?: string
+          lead_id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_history_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follow_ups: {
         Row: {
           assigned_agent: string
