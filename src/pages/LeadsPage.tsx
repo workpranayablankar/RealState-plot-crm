@@ -67,6 +67,13 @@ export default function LeadsPage() {
     fetchLeads();
   };
 
+  const deleteLead = async (id: string) => {
+    await supabase.from("leads").delete().eq("id", id);
+    setSelectedId(null);
+    toast({ title: "Lead deleted" });
+    fetchLeads();
+  };
+
   const getAgentName = (agentId: string | null) => {
     if (!agentId) return "Unassigned";
     return agents.find((a) => a.user_id === agentId)?.full_name || "Unknown";
