@@ -31,6 +31,8 @@ export default function AddLeadPage() {
     }
   }, [role]);
 
+  const { user } = useAuth();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.phone) {
@@ -38,9 +40,11 @@ export default function AddLeadPage() {
       return;
     }
 
-    // Round-robin if no agent selected
+    // For agents, self-assign. For admin, round-robin if no agent selected.
     let agentId = form.assigned_agent || null;
-    if (!agentId && agents.length > 0) {
+    if (role === "agent") {
+      agentId = user?.id || null;
+    } else if (!agentId && agents.length > 0) {
       const { count } = await supabase.from("leads").select("*", { count: "exact", head: true });
       const idx = (count || 0) % agents.length;
       agentId = agents[idx].user_id;
@@ -95,13 +99,15 @@ export default function AddLeadPage() {
                     <SelectContent>{SOURCES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label>Assign Agent</Label>
-                  <Select value={form.assigned_agent} onValueChange={(v) => setForm({...form, assigned_agent: v})}>
-                    <SelectTrigger><SelectValue placeholder="Auto-assign" /></SelectTrigger>
-                    <SelectContent>{agents.map((a) => <SelectItem key={a.user_id} value={a.user_id}>{a.full_name}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
+                {role === "admin" && (
+                  <div>
+                    <Label>Assign Agent</Label>
+                    <Select value={form.assigned_agent} onValueChange={(v) => setForm({...form, assigned_agent: v})}>
+                      <SelectTrigger><SelectValue placeholder="Auto-assign" /></SelectTrigger>
+                      <SelectContent>{agents.map((a) => <SelectItem key={a.user_id} value={a.user_id}>{a.full_name}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
               <div><Label>Notes</Label><Textarea value={form.notes} onChange={(e) => setForm({...form, notes: e.target.value})} /></div>
               <Button type="submit" className="w-full">Add Lead</Button>
