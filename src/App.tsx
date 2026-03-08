@@ -49,8 +49,8 @@ function AppRoutes() {
       <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute adminOnly><SettingsPage /></ProtectedRoute>}>
         <Route path="users" element={<UserManagementPage />} />
-        <Route path="roles" element={<SettingsPlaceholder />} />
-        <Route path="lead-statuses" element={<SettingsPlaceholder />} />
+        <Route path="roles" element={<RolesPermissionsPage />} />
+        <Route path="lead-statuses" element={<LeadStatusSetupPage />} />
         <Route path="lead-sources" element={<SettingsPlaceholder />} />
         <Route path="plots" element={<SettingsPlaceholder />} />
         <Route path="assignment" element={<SettingsPlaceholder />} />
