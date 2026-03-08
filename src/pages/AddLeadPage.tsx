@@ -34,7 +34,7 @@ export default function AddLeadPage() {
   const [form, setForm] = useState({
     name: "", phone: "", email: "", location: "", address: "", budget: "",
     property_interest: "", source: "" as typeof SOURCES[number] | "",
-    assigned_agent: "", notes: "", interested_plot: "", interested_plot_label: "",
+    assigned_agent: "", assigned_agent_label: "", notes: "", interested_plot: "", interested_plot_label: "",
   });
 
   useEffect(() => {
