@@ -12,14 +12,17 @@ const STATUSES = ["New Lead", "Contacted", "Interested", "Site Visit Scheduled",
 export default function ReportsPage() {
   const [leads, setLeads] = useState<any[]>([]);
   const [agents, setAgents] = useState<any[]>([]);
+  const [roles, setRoles] = useState<any[]>([]);
 
   useEffect(() => {
     Promise.all([
       supabase.from("leads").select("*"),
       supabase.from("profiles").select("user_id, full_name"),
-    ]).then(([leadsRes, profilesRes]) => {
+      supabase.from("user_roles").select("user_id, role"),
+    ]).then(([leadsRes, profilesRes, rolesRes]) => {
       setLeads(leadsRes.data || []);
       setAgents(profilesRes.data || []);
+      setRoles(rolesRes.data || []);
     });
   }, []);
 
@@ -42,19 +45,27 @@ export default function ReportsPage() {
     return d >= lmStart && d <= lmEnd;
   });
 
-  // Agent performance
-  const agentReport = agents.map((a) => {
-    const al = leads.filter((l) => l.assigned_agent === a.user_id);
-    const closed = al.filter((l) => l.status === "Deal Closed").length;
-    const siteVisits = al.filter((l) => l.status === "Site Visit Scheduled").length;
-    return {
-      name: a.full_name,
-      total: al.length,
-      closed,
-      siteVisits,
-      rate: al.length > 0 ? ((closed / al.length) * 100).toFixed(1) : "0",
-    };
-  }).sort((a, b) => b.closed - a.closed);
+  const getRoleFor = (userId: string) => roles.find(r => r.user_id === userId)?.role || "agent";
+
+  const buildReport = (role: string) =>
+    agents
+      .filter((a) => getRoleFor(a.user_id) === role)
+      .map((a) => {
+        const al = leads.filter((l) => l.assigned_agent === a.user_id);
+        const closed = al.filter((l) => l.status === "Deal Closed").length;
+        const siteVisits = al.filter((l) => l.status === "Site Visit Scheduled").length;
+        return {
+          name: a.full_name,
+          total: al.length,
+          closed,
+          siteVisits,
+          rate: al.length > 0 ? ((closed / al.length) * 100).toFixed(1) : "0",
+        };
+      })
+      .sort((a, b) => b.closed - a.closed);
+
+  const agentReport = buildReport("agent");
+  const telecallerReport = buildReport("telecaller");
 
   // Source report
   const sourceReport = SOURCES.map((s) => {
@@ -137,7 +148,35 @@ export default function ReportsPage() {
                       <td className="px-4 py-3 text-foreground">{a.rate}%</td>
                     </tr>
                   ))}
-                  {agentReport.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No data</td></tr>}
+                  {agentReport.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No agents</td></tr>}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
+
+          {/* Telecaller Performance */}
+          <Card>
+            <CardHeader><CardTitle className="text-base">Telecaller Performance</CardTitle></CardHeader>
+            <CardContent className="p-0">
+              <table className="w-full text-sm">
+                <thead><tr className="border-b bg-muted/50">
+                  <th className="px-4 py-3 text-left text-muted-foreground font-medium">Telecaller</th>
+                  <th className="px-4 py-3 text-left text-muted-foreground font-medium">Leads</th>
+                  <th className="px-4 py-3 text-left text-muted-foreground font-medium">Visits</th>
+                  <th className="px-4 py-3 text-left text-muted-foreground font-medium">Closed</th>
+                  <th className="px-4 py-3 text-left text-muted-foreground font-medium">Rate</th>
+                </tr></thead>
+                <tbody>
+                  {telecallerReport.map((a) => (
+                    <tr key={a.name} className="border-b last:border-0">
+                      <td className="px-4 py-3 font-medium text-foreground">{a.name}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{a.total}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{a.siteVisits}</td>
+                      <td className="px-4 py-3 text-success font-medium">{a.closed}</td>
+                      <td className="px-4 py-3 text-foreground">{a.rate}%</td>
+                    </tr>
+                  ))}
+                  {telecallerReport.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No telecallers</td></tr>}
                 </tbody>
               </table>
             </CardContent>
