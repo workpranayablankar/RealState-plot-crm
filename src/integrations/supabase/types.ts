@@ -161,6 +161,7 @@ export type Database = {
       }
       leads: {
         Row: {
+          address: string | null
           assigned_agent: string | null
           budget: string | null
           created_at: string
@@ -177,6 +178,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address?: string | null
           assigned_agent?: string | null
           budget?: string | null
           created_at?: string
@@ -193,6 +195,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address?: string | null
           assigned_agent?: string | null
           budget?: string | null
           created_at?: string
@@ -418,7 +421,16 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "agent"
-      lead_source: "Website" | "Facebook Ads" | "Google Ads" | "Manual"
+      lead_source:
+        | "Website"
+        | "Facebook Ads"
+        | "Google Ads"
+        | "Manual"
+        | "Facebook"
+        | "Instagram"
+        | "Referral"
+        | "Direct Call"
+        | "Other"
       lead_status:
         | "New Lead"
         | "Contacted"
@@ -556,7 +568,17 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "agent"],
-      lead_source: ["Website", "Facebook Ads", "Google Ads", "Manual"],
+      lead_source: [
+        "Website",
+        "Facebook Ads",
+        "Google Ads",
+        "Manual",
+        "Facebook",
+        "Instagram",
+        "Referral",
+        "Direct Call",
+        "Other",
+      ],
       lead_status: [
         "New Lead",
         "Contacted",
