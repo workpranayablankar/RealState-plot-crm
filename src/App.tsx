@@ -54,9 +54,9 @@ function AppRoutes() {
         <Route path="users" element={<UserManagementPage />} />
         <Route path="roles" element={<RolesPermissionsPage />} />
         <Route path="lead-statuses" element={<LeadStatusSetupPage />} />
-        <Route path="lead-sources" element={<SettingsPlaceholder />} />
-        <Route path="plots" element={<SettingsPlaceholder />} />
-        <Route path="assignment" element={<SettingsPlaceholder />} />
+        <Route path="lead-sources" element={<LeadSourcesPage />} />
+        <Route path="plots" element={<PlotSettingsPage />} />
+        <Route path="assignment" element={<LeadAssignmentPage />} />
         <Route path="integrations" element={<SettingsPlaceholder />} />
         <Route path="notifications" element={<SettingsPlaceholder />} />
         <Route path="import-export" element={<SettingsPlaceholder />} />
