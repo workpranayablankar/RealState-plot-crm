@@ -26,7 +26,7 @@ export default function Dashboard() {
 
       // Follow-ups
       let fuQuery = supabase.from("follow_ups").select("*").eq("status", "Pending");
-      if (role === "agent") fuQuery = fuQuery.eq("assigned_agent", user?.id);
+      if (role === "agent" || role === "telecaller") fuQuery = fuQuery.eq("assigned_agent", user?.id);
       const { data: fuData } = await fuQuery;
       setFollowUps(fuData || []);
 
