@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Search, Eye, Download, Trash2 } from "lucide-react";
+import { Search, Eye, Download, Trash2, Phone } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -38,7 +38,7 @@ export default function LeadsPage() {
 
   const fetchLeads = async () => {
     let query = supabase.from("leads").select("*").order("created_at", { ascending: false });
-    if (role === "agent") query = query.eq("assigned_agent", user?.id);
+    if (role === "agent" || role === "telecaller") query = query.eq("assigned_agent", user?.id);
     const { data } = await query;
     setLeads(data || []);
   };
@@ -111,11 +111,18 @@ export default function LeadsPage() {
             <h1 className="text-2xl font-bold text-foreground">Leads</h1>
             <p className="text-sm text-muted-foreground">{filtered.length} leads found</p>
           </div>
-          {role === "admin" && (
-            <Button variant="outline" onClick={exportCSV}>
-              <Download className="mr-2 h-4 w-4" />Export CSV
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {role === "admin" && (
+              <Button variant="outline" onClick={exportCSV}>
+                <Download className="mr-2 h-4 w-4" />Export CSV
+              </Button>
+            )}
+            {role === "telecaller" && selectedLead && (
+              <Button variant="outline" asChild>
+                <a href={`tel:${selectedLead.phone}`}><Phone className="mr-2 h-4 w-4" />Call Now</a>
+              </Button>
+            )}
+          </div>
         </div>
 
         <Card>
@@ -169,6 +176,11 @@ export default function LeadsPage() {
                       <td className="px-4 py-3 font-medium text-foreground">{lead.budget}</td>
                       <td className="px-4 py-3 flex items-center gap-1">
                         <Button variant="ghost" size="sm" onClick={() => setSelectedId(lead.id)}><Eye className="h-4 w-4" /></Button>
+                        {role === "telecaller" && (
+                          <Button variant="ghost" size="sm" asChild>
+                            <a href={`tel:${lead.phone}`}><Phone className="h-4 w-4 text-success" /></a>
+                          </Button>
+                        )}
                         {role === "admin" && (
                           <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => deleteLead(lead.id)}>
                             <Trash2 className="h-4 w-4" />

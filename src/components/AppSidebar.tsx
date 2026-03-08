@@ -13,6 +13,7 @@ import {
   Activity,
   Bell,
   Settings,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -23,8 +24,9 @@ export function AppSidebar() {
   const links = [
     { to: "/", label: "Dashboard", icon: LayoutDashboard },
     { to: "/leads", label: "Leads", icon: Users },
-    { to: "/add-lead", label: "Add Lead", icon: Plus },
+    ...(role !== "telecaller" ? [{ to: "/add-lead", label: "Add Lead", icon: Plus }] : []),
     { to: "/follow-ups", label: "Follow Ups", icon: CalendarClock },
+    ...(role === "telecaller" ? [{ to: "/call-history", label: "Call History", icon: Phone }] : []),
     ...(role === "admin" ? [{ to: "/agents", label: "Agents", icon: UserCheck }] : []),
     { to: "/plots", label: "Plots", icon: Map },
     { to: "/activities", label: "Activities", icon: Activity },
