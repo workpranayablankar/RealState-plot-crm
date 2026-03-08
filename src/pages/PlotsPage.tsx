@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Edit, MapPin } from "lucide-react";
+import { Plus, Edit, MapPin, Download, Upload } from "lucide-react";
 
 type PlotStatus = "Available" | "Booked" | "Sold";
 
@@ -39,6 +39,7 @@ export default function PlotsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [importing, setImporting] = useState(false);
 
   const fetchPlots = async () => {
     const { data } = await supabase.from("plots").select("*").order("created_at", { ascending: false });
@@ -72,6 +73,67 @@ export default function PlotsPage() {
   const counts = { Available: 0, Booked: 0, Sold: 0 };
   plots.forEach((p) => counts[p.status]++);
 
+  const exportCSV = () => {
+    const headers = ["Plot Name", "Plot No", "Location", "Size", "Price", "Status"];
+    const rows = plots.map((p) => [p.plot_name, p.plot_no, p.location, p.size, p.price, p.status]);
+    const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `plots-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Exported", description: `${plots.length} plots exported to CSV` });
+  };
+
+  const importCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const text = ev.target?.result as string;
+      const lines = text.split("\n").filter((l) => l.trim());
+      const header = lines[0].toLowerCase();
+      const hasHeader = header.includes("plot") || header.includes("name") || header.includes("location");
+      const dataLines = hasHeader ? lines.slice(1) : lines;
+
+      const parseRow = (line: string) => {
+        const cols = line.split(",").map((c) => c.replace(/^"|"$/g, "").trim());
+        const status = (["Available", "Booked", "Sold"] as PlotStatus[]).find(
+          (s) => s.toLowerCase() === (cols[5] || "").toLowerCase()
+        ) || "Available";
+        return {
+          plot_name: cols[0] || "Unnamed",
+          plot_no: cols[1] || "",
+          location: cols[2] || "",
+          size: cols[3] || "",
+          price: cols[4] || "",
+          status,
+        };
+      };
+
+      const rows = dataLines.map(parseRow);
+      if (rows.length === 0) {
+        toast({ title: "No data found", variant: "destructive" });
+        setImporting(false);
+        return;
+      }
+
+      const { error } = await supabase.from("plots").insert(rows as any);
+      if (error) {
+        toast({ title: "Import failed", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Imported", description: `${rows.length} plots imported` });
+        fetchPlots();
+      }
+      setImporting(false);
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
   return (
     <AppLayout>
       <div className="space-y-4">
@@ -80,7 +142,16 @@ export default function PlotsPage() {
             <h1 className="text-2xl font-bold text-foreground">Plots / Properties</h1>
             <p className="text-sm text-muted-foreground">{plots.length} plots total</p>
           </div>
-          <Button onClick={openNew}><Plus className="mr-2 h-4 w-4" />Add Plot</Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={exportCSV}><Download className="mr-2 h-4 w-4" />Export CSV</Button>
+            <Button variant="outline" asChild>
+              <label className="cursor-pointer">
+                <Upload className="mr-2 h-4 w-4" />{importing ? "Importing..." : "Import CSV"}
+                <input type="file" accept=".csv" className="hidden" onChange={importCSV} disabled={importing} />
+              </label>
+            </Button>
+            <Button onClick={openNew}><Plus className="mr-2 h-4 w-4" />Add Plot</Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
