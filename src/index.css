@@ -140,3 +140,33 @@
     color: hsl(var(--chart-notinterested));
   }
 }
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* Hide sidebar, nav, and buttons during print */
+  nav, aside, header, [data-sidebar], .print\\:hidden {
+    display: none !important;
+  }
+  /* Make main content full width */
+  main {
+    margin: 0 !important;
+    padding: 1rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  button {
+    display: none !important;
+  }
+  /* Keep tables visible */
+  table {
+    page-break-inside: auto;
+  }
+  tr {
+    page-break-inside: avoid;
+  }
+}
