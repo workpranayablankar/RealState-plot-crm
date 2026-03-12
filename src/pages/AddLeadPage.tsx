@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { ImportLeadsModal } from "@/components/ImportLeadsModal";
 
 const SOURCES = ["Website", "Facebook", "Instagram", "Referral", "Direct Call", "Agent", "Other"] as const;
+const REQUIREMENT_TYPES = ["Investment", "Build House", "Build Shop", "Commercial Use", "Rental Property", "Other"] as const;
 
 export default function AddLeadPage() {
   const navigate = useNavigate();
