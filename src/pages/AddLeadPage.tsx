@@ -275,7 +275,7 @@ export default function AddLeadPage() {
                 </div>
               </div>
 
-              {/* Lead Source & Assign Agent */}
+              {/* Lead Source & Requirement Type */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>Lead Source</Label>
@@ -286,6 +286,19 @@ export default function AddLeadPage() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-1.5">
+                  <Label>Requirement Type</Label>
+                  <Select value={form.requirement_type} onValueChange={(v) => setField("requirement_type", v)}>
+                    <SelectTrigger><SelectValue placeholder="Select requirement" /></SelectTrigger>
+                    <SelectContent>
+                      {REQUIREMENT_TYPES.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Assign Agent */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {role === "admin" && (
                   <div className="space-y-1.5">
                     <Label>Assign Agent</Label>
