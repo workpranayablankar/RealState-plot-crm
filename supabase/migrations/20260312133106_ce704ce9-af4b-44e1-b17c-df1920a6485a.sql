@@ -1,0 +1,1 @@
+ALTER TABLE public.leads ADD COLUMN requirement_type text DEFAULT '' NOT NULL;

@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { ImportLeadsModal } from "@/components/ImportLeadsModal";
 
 const SOURCES = ["Website", "Facebook", "Instagram", "Referral", "Direct Call", "Agent", "Other"] as const;
+const REQUIREMENT_TYPES = ["Investment", "Build House", "Build Shop", "Commercial Use", "Rental Property", "Other"] as const;
 
 export default function AddLeadPage() {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ export default function AddLeadPage() {
   const [form, setForm] = useState({
     name: "", phone: "", email: "", location: "", address: "", budget: "",
     property_interest: "", source: "" as typeof SOURCES[number] | "",
+    requirement_type: "" as typeof REQUIREMENT_TYPES[number] | "",
     assigned_agent: "", assigned_agent_label: "", notes: "", interested_plot: "", interested_plot_label: "",
   });
 
@@ -96,6 +98,7 @@ export default function AddLeadPage() {
       budget: form.budget ? `₹${form.budget}` : null,
       property_interest: form.property_interest || "Residential Plot",
       source: (form.source || "Manual") as any,
+      requirement_type: form.requirement_type || "",
       assigned_agent: agentId,
       notes: form.notes.trim() || null,
       interested_plot: form.interested_plot || null,
@@ -272,7 +275,7 @@ export default function AddLeadPage() {
                 </div>
               </div>
 
-              {/* Lead Source & Assign Agent */}
+              {/* Lead Source & Requirement Type */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>Lead Source</Label>
@@ -283,6 +286,19 @@ export default function AddLeadPage() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-1.5">
+                  <Label>Requirement Type</Label>
+                  <Select value={form.requirement_type} onValueChange={(v) => setField("requirement_type", v)}>
+                    <SelectTrigger><SelectValue placeholder="Select requirement" /></SelectTrigger>
+                    <SelectContent>
+                      {REQUIREMENT_TYPES.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Assign Agent */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {role === "admin" && (
                   <div className="space-y-1.5">
                     <Label>Assign Agent</Label>
