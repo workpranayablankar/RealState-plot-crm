@@ -98,6 +98,7 @@ export default function AddLeadPage() {
       budget: form.budget ? `₹${form.budget}` : null,
       property_interest: form.property_interest || "Residential Plot",
       source: (form.source || "Manual") as any,
+      requirement_type: form.requirement_type || "",
       assigned_agent: agentId,
       notes: form.notes.trim() || null,
       interested_plot: form.interested_plot || null,
