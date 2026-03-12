@@ -150,6 +150,9 @@ export default function ReportsPage() {
             <Button variant="outline" size="sm" className="gap-1.5" onClick={exportFullReport}>
               <Download className="h-3.5 w-3.5" /> Export CSV
             </Button>
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={handlePrint}>
+              <Printer className="h-3.5 w-3.5" /> Print
+            </Button>
           </div>
         </div>
 
