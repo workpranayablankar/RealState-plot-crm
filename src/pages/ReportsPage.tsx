@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, TrendingUp, Users, Target, Download } from "lucide-react";
+import { BarChart3, TrendingUp, Users, Target, Download, Printer } from "lucide-react";
 import { format, startOfDay, endOfDay, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 
@@ -129,6 +129,10 @@ export default function ReportsPage() {
     downloadCSV(`source-analysis-${period}-${format(now, "yyyy-MM-dd")}.csv`, headers, rows);
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -145,6 +149,9 @@ export default function ReportsPage() {
             </Tabs>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={exportFullReport}>
               <Download className="h-3.5 w-3.5" /> Export CSV
+            </Button>
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={handlePrint}>
+              <Printer className="h-3.5 w-3.5" /> Print
             </Button>
           </div>
         </div>

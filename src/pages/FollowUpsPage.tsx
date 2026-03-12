@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarClock, Plus, Check, Phone, Clock, AlertTriangle, Trash2 } from "lucide-react";
+import { CalendarClock, Plus, Check, Phone, Clock, AlertTriangle, Trash2, Bell } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { format, isToday, isTomorrow, isBefore, startOfDay } from "date-fns";
 
@@ -19,6 +19,7 @@ interface FollowUp {
   lead_id: string;
   assigned_agent: string;
   follow_up_date: string;
+  follow_up_time: string | null;
   notes: string;
   status: string;
   created_at: string;
@@ -33,7 +34,8 @@ export default function FollowUpsPage() {
   const [leads, setLeads] = useState<any[]>([]);
   const [agents, setAgents] = useState<any[]>([]);
   const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({ lead_id: "", follow_up_date: "", notes: "" });
+  const [form, setForm] = useState({ lead_id: "", follow_up_date: "", follow_up_time: "", notes: "" });
+  const [remindedIds, setRemindedIds] = useState<Set<string>>(new Set());
 
   const fetchData = async () => {
     const [fuRes, leadsRes, profilesRes] = await Promise.all([
@@ -61,6 +63,46 @@ export default function FollowUpsPage() {
   };
 
   useEffect(() => { fetchData(); }, []);
+
+  // Check for follow-up reminders every minute
+  const checkReminders = useCallback(() => {
+    const now = new Date();
+    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    followUps.forEach((fu) => {
+      if (fu.status !== "Pending" || !fu.follow_up_time || remindedIds.has(fu.id)) return;
+      if (!isToday(new Date(fu.follow_up_date))) return;
+
+      // Check if current time matches or has passed the follow-up time (within 1 min window)
+      const fuTimeParts = fu.follow_up_time.split(":");
+      const fuTimeStr = `${fuTimeParts[0]}:${fuTimeParts[1]}`;
+      if (currentTime >= fuTimeStr && currentTime <= `${fuTimeParts[0]}:${String(Number(fuTimeParts[1]) + 1).padStart(2, '0')}`) {
+        toast({
+          title: `⏰ Follow-up Reminder`,
+          description: `Time to call ${fu.lead_name} (${fu.lead_phone})`,
+        });
+
+        // Create in-app notification
+        if (user?.id) {
+          supabase.from("notifications").insert({
+            user_id: fu.assigned_agent,
+            title: "Follow-up Reminder",
+            message: `Scheduled call with ${fu.lead_name} (${fu.lead_phone}) at ${fuTimeStr}`,
+            type: "reminder",
+            lead_id: fu.lead_id,
+          }).then(() => {});
+        }
+
+        setRemindedIds((prev) => new Set([...prev, fu.id]));
+      }
+    });
+  }, [followUps, remindedIds, user?.id]);
+
+  useEffect(() => {
+    const interval = setInterval(checkReminders, 30000); // Check every 30 seconds
+    checkReminders(); // Check immediately
+    return () => clearInterval(interval);
+  }, [checkReminders]);
 
   const today = startOfDay(new Date());
   const pending = followUps.filter(f => f.status === "Pending");
@@ -95,12 +137,23 @@ export default function FollowUpsPage() {
       lead_id: form.lead_id,
       assigned_agent: agentId,
       follow_up_date: form.follow_up_date,
+      follow_up_time: form.follow_up_time || null,
       notes: form.notes,
-    });
+    } as any);
     toast({ title: "Follow-up scheduled" });
     setShowAdd(false);
-    setForm({ lead_id: "", follow_up_date: "", notes: "" });
+    setForm({ lead_id: "", follow_up_date: "", follow_up_time: "", notes: "" });
     fetchData();
+  };
+
+  const formatTime = (time: string | null) => {
+    if (!time) return null;
+    const parts = time.split(":");
+    const h = parseInt(parts[0]);
+    const m = parts[1];
+    const ampm = h >= 12 ? "PM" : "AM";
+    const h12 = h % 12 || 12;
+    return `${h12}:${m} ${ampm}`;
   };
 
   const FollowUpCard = ({ fu }: { fu: FollowUp }) => (
@@ -111,8 +164,13 @@ export default function FollowUpsPage() {
           <Phone className="h-3 w-3" /> {fu.lead_phone}
         </p>
         {fu.notes && <p className="text-sm text-muted-foreground">{fu.notes}</p>}
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground flex items-center gap-1">
           Agent: {fu.agent_name} · {format(new Date(fu.follow_up_date), "dd MMM yyyy")}
+          {fu.follow_up_time && (
+            <span className="inline-flex items-center gap-0.5 ml-1 text-primary font-medium">
+              <Bell className="h-3 w-3" /> {formatTime(fu.follow_up_time)}
+            </span>
+          )}
         </p>
       </div>
       <div className="flex items-center gap-2">
@@ -201,13 +259,19 @@ export default function FollowUpsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label>Follow Up Date</Label>
-              <Input type="date" value={form.follow_up_date} onChange={e => setForm({ ...form, follow_up_date: e.target.value })} />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Follow Up Date</Label>
+                <Input type="date" value={form.follow_up_date} onChange={e => setForm({ ...form, follow_up_date: e.target.value })} />
+              </div>
+              <div>
+                <Label>Follow Up Time</Label>
+                <Input type="time" value={form.follow_up_time} onChange={e => setForm({ ...form, follow_up_time: e.target.value })} placeholder="e.g. 4:00 PM" />
+              </div>
             </div>
             <div>
               <Label>Notes</Label>
-              <Textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Call about plot pricing..." />
+              <Textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="e.g. Customer said call at 4 PM..." />
             </div>
             <Button className="w-full" onClick={handleAdd}>Schedule</Button>
           </div>

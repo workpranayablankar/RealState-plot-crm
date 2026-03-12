@@ -143,6 +143,7 @@ export type Database = {
           assigned_agent: string
           created_at: string
           follow_up_date: string
+          follow_up_time: string | null
           id: string
           lead_id: string
           notes: string | null
@@ -153,6 +154,7 @@ export type Database = {
           assigned_agent: string
           created_at?: string
           follow_up_date: string
+          follow_up_time?: string | null
           id?: string
           lead_id: string
           notes?: string | null
@@ -163,6 +165,7 @@ export type Database = {
           assigned_agent?: string
           created_at?: string
           follow_up_date?: string
+          follow_up_time?: string | null
           id?: string
           lead_id?: string
           notes?: string | null

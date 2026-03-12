@@ -1,0 +1,1 @@
+ALTER TABLE public.follow_ups ADD COLUMN follow_up_time time DEFAULT NULL;
