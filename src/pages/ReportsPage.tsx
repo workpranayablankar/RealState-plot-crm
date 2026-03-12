@@ -129,6 +129,10 @@ export default function ReportsPage() {
     downloadCSV(`source-analysis-${period}-${format(now, "yyyy-MM-dd")}.csv`, headers, rows);
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6">
