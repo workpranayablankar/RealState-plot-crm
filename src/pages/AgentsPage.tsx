@@ -43,14 +43,14 @@ export default function AgentsPage() {
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       {items.map((a) => (
         <Card key={a.user_id}>
-          <CardContent className="p-5 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+          <CardContent className="p-4 sm:p-5 space-y-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full bg-primary text-xs sm:text-sm font-bold text-primary-foreground">
                 {a.full_name?.split(" ").map((n: string) => n[0]).join("") || "?"}
               </div>
-              <div>
-                <p className="font-semibold text-foreground">{a.full_name}</p>
-                <p className="text-xs text-muted-foreground">{a.email}</p>
+              <div className="min-w-0">
+                <p className="font-semibold text-foreground text-sm sm:text-base truncate">{a.full_name}</p>
+                <p className="text-xs text-muted-foreground truncate">{a.email}</p>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
