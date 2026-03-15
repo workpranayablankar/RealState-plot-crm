@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { CheckCircle2, XCircle, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Permission {
   label: string;
@@ -41,14 +42,13 @@ export default function RolesPermissionsPage() {
   const [permissions, setPermissions] = useState<Permission[]>(defaultPermissions);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
-    // Load saved permissions from system_preferences or localStorage
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as Permission[];
-        // Merge with defaults to pick up new permissions
         const merged = defaultPermissions.map((dp) => {
           const found = parsed.find((p) => p.key === dp.key);
           return found ? { ...dp, agent: found.agent, telecaller: found.telecaller } : dp;
@@ -91,12 +91,19 @@ export default function RolesPermissionsPage() {
     setEditing(false);
   };
 
+  const StatusIcon = ({ enabled }: { enabled: boolean }) =>
+    enabled ? (
+      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-success mx-auto" />
+    ) : (
+      <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground/40 mx-auto" />
+    );
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-foreground">Roles & Permissions</h2>
-          <p className="text-sm text-muted-foreground">Configure access control for each role</p>
+          <h2 className="text-lg sm:text-xl font-bold text-foreground">Roles & Permissions</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground">Configure access control for each role</p>
         </div>
         <div className="flex gap-2">
           {editing ? (
@@ -112,54 +119,90 @@ export default function RolesPermissionsPage() {
         </div>
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-left font-medium text-foreground">Permission</th>
-                <th className="px-4 py-3 text-center font-medium text-foreground">
-                  <Badge variant="default">Admin</Badge>
-                </th>
-                <th className="px-4 py-3 text-center font-medium text-foreground">
-                  <Badge variant="secondary">Agent</Badge>
-                </th>
-                <th className="px-4 py-3 text-center font-medium text-foreground">
-                  <Badge variant="outline">Telecaller</Badge>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {permissions.map((p) => (
-                <tr key={p.key} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 text-foreground">{p.label}</td>
-                  <td className="px-4 py-3 text-center">
-                    <CheckCircle2 className="h-5 w-5 text-success mx-auto" />
-                  </td>
-                  <td className="px-4 py-3 text-center">
+      {isMobile ? (
+        /* Mobile: card-based layout */
+        <div className="space-y-2">
+          {permissions.map((p) => (
+            <Card key={p.key}>
+              <CardContent className="p-3">
+                <p className="text-sm font-medium text-foreground mb-2">{p.label}</p>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div>
+                    <p className="text-[10px] text-muted-foreground mb-1">Admin</p>
+                    <StatusIcon enabled={p.admin} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground mb-1">Agent</p>
                     {editing ? (
-                      <Switch checked={p.agent} onCheckedChange={() => togglePerm(p.key, "agent")} />
-                    ) : p.agent ? (
-                      <CheckCircle2 className="h-5 w-5 text-success mx-auto" />
+                      <Switch checked={p.agent} onCheckedChange={() => togglePerm(p.key, "agent")} className="mx-auto" />
                     ) : (
-                      <XCircle className="h-5 w-5 text-muted-foreground/40 mx-auto" />
+                      <StatusIcon enabled={p.agent} />
                     )}
-                  </td>
-                  <td className="px-4 py-3 text-center">
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground mb-1">Telecaller</p>
                     {editing ? (
-                      <Switch checked={p.telecaller} onCheckedChange={() => togglePerm(p.key, "telecaller")} />
-                    ) : p.telecaller ? (
-                      <CheckCircle2 className="h-5 w-5 text-success mx-auto" />
+                      <Switch checked={p.telecaller} onCheckedChange={() => togglePerm(p.key, "telecaller")} className="mx-auto" />
                     ) : (
-                      <XCircle className="h-5 w-5 text-muted-foreground/40 mx-auto" />
+                      <StatusIcon enabled={p.telecaller} />
                     )}
-                  </td>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        /* Desktop: table layout */
+        <Card>
+          <CardContent className="p-0">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-muted/50">
+                  <th className="px-4 py-3 text-left font-medium text-foreground">Permission</th>
+                  <th className="px-4 py-3 text-center font-medium text-foreground">
+                    <Badge variant="default">Admin</Badge>
+                  </th>
+                  <th className="px-4 py-3 text-center font-medium text-foreground">
+                    <Badge variant="secondary">Agent</Badge>
+                  </th>
+                  <th className="px-4 py-3 text-center font-medium text-foreground">
+                    <Badge variant="outline">Telecaller</Badge>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
+              </thead>
+              <tbody>
+                {permissions.map((p) => (
+                  <tr key={p.key} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3 text-foreground">{p.label}</td>
+                    <td className="px-4 py-3 text-center">
+                      <CheckCircle2 className="h-5 w-5 text-success mx-auto" />
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {editing ? (
+                        <Switch checked={p.agent} onCheckedChange={() => togglePerm(p.key, "agent")} />
+                      ) : p.agent ? (
+                        <CheckCircle2 className="h-5 w-5 text-success mx-auto" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-muted-foreground/40 mx-auto" />
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {editing ? (
+                        <Switch checked={p.telecaller} onCheckedChange={() => togglePerm(p.key, "telecaller")} />
+                      ) : p.telecaller ? (
+                        <CheckCircle2 className="h-5 w-5 text-success mx-auto" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-muted-foreground/40 mx-auto" />
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

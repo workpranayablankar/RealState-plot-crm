@@ -211,8 +211,8 @@ export default function IntegrationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-foreground">Integrations</h2>
-        <p className="text-sm text-muted-foreground">Connect external lead sources and manage developer API keys</p>
+        <h2 className="text-lg sm:text-xl font-bold text-foreground">Integrations</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground">Connect external lead sources and manage API keys</p>
       </div>
 
       {/* Developer API Keys Section */}
@@ -267,73 +267,57 @@ export default function IntegrationsPage() {
           <p className="text-sm text-muted-foreground">Create and manage API keys for external integrations</p>
         </CardHeader>
         <CardContent className="p-0">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-left text-muted-foreground font-medium">Label</th>
-                <th className="px-4 py-3 text-left text-muted-foreground font-medium">Key</th>
-                <th className="px-4 py-3 text-left text-muted-foreground font-medium">Created</th>
-                <th className="px-4 py-3 text-right text-muted-foreground font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {apiKeys.map((k) => (
-                <tr key={k.id} className="border-b last:border-0">
-                  <td className="px-4 py-3 font-medium text-foreground">{k.label}</td>
-                  <td className="px-4 py-3">
-                    <code className="rounded bg-muted px-2 py-0.5 text-xs font-mono text-muted-foreground">{k.key_prefix}</code>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">
-                    {new Date(k.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete API Key</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently revoke the key "{k.label}". Any integrations using this key will stop working.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDeleteKey(k.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </td>
-                </tr>
-              ))}
-              {apiKeys.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
-                    No API keys yet. Create one to get started.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <div className="divide-y">
+            {apiKeys.map((k) => (
+              <div key={k.id} className="flex items-center justify-between gap-2 px-3 sm:px-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground truncate">{k.label}</p>
+                  <code className="text-xs font-mono text-muted-foreground">{k.key_prefix}</code>
+                  <p className="text-[10px] text-muted-foreground">{new Date(k.created_at).toLocaleDateString()}</p>
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-destructive hover:text-destructive">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete API Key</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently revoke the key "{k.label}". Any integrations using this key will stop working.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDeleteKey(k.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            ))}
+            {apiKeys.length === 0 && (
+              <p className="px-4 py-8 text-center text-muted-foreground text-sm">
+                No API keys yet. Create one to get started.
+              </p>
+            )}
+          </div>
         </CardContent>
       </Card>
 
       {/* Default Platform Key */}
       <Card className="border-primary/20">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <p className="text-sm font-medium text-foreground">Platform API Key</p>
-              <p className="text-xs text-muted-foreground">Default key for webhook integrations. Include as <code className="text-xs">apikey</code> header.</p>
+              <p className="text-xs text-muted-foreground">Default key for webhooks. Include as <code className="text-xs">apikey</code> header.</p>
             </div>
             <div className="flex items-center gap-2">
-              <code className="rounded bg-muted px-2 py-1 text-xs font-mono text-foreground">
-                {ANON_KEY ? ANON_KEY.slice(0, 24) + "..." : "Not configured"}
+              <code className="rounded bg-muted px-2 py-1 text-[10px] sm:text-xs font-mono text-foreground truncate max-w-[180px] sm:max-w-none">
+                {ANON_KEY ? ANON_KEY.slice(0, 20) + "..." : "Not configured"}
               </code>
               <Button variant="outline" size="sm" onClick={() => copyText(ANON_KEY, "Platform Key")}>
                 <Copy className="h-3 w-3" />
@@ -345,10 +329,10 @@ export default function IntegrationsPage() {
 
       {/* Integration Tabs */}
       <Tabs defaultValue="website">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
           {integrations.map((i) => (
-            <TabsTrigger key={i.id} value={i.id} className="text-xs gap-1">
-              <i.icon className="h-3.5 w-3.5" /> {i.name.split(" ")[0]}
+            <TabsTrigger key={i.id} value={i.id} className="text-[10px] sm:text-xs gap-1 px-1.5 sm:px-3 py-1.5">
+              <i.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" /> <span className="truncate">{i.name.split(" ")[0]}</span>
             </TabsTrigger>
           ))}
         </TabsList>

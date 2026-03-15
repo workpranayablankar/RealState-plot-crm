@@ -67,8 +67,8 @@ export default function SystemPreferencesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-foreground">System Preferences</h2>
-        <p className="text-sm text-muted-foreground">Configure your CRM settings</p>
+        <h2 className="text-lg sm:text-xl font-bold text-foreground">System Preferences</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground">Configure your CRM settings</p>
       </div>
 
       <Card>
@@ -78,7 +78,7 @@ export default function SystemPreferencesPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
             <div>
               <Label>Company Name</Label>
               <Input

@@ -32,7 +32,6 @@ export default function UserManagementPage() {
   const [editRole, setEditRole] = useState<AppRole>("agent");
   const [saving, setSaving] = useState(false);
 
-  // Add user state
   const [showAdd, setShowAdd] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
@@ -41,12 +40,10 @@ export default function UserManagementPage() {
   const [newPassword, setNewPassword] = useState("");
   const [adding, setAdding] = useState(false);
 
-  // Change password state
   const [passwordUser, setPasswordUser] = useState<UserRow | null>(null);
   const [newPwd, setNewPwd] = useState("");
   const [changingPwd, setChangingPwd] = useState(false);
 
-  // Delete state
   const [deleting, setDeleting] = useState<string | null>(null);
 
   const fetchUsers = async () => {
@@ -187,15 +184,15 @@ export default function UserManagementPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-foreground">User Management</h2>
-          <p className="text-sm text-muted-foreground">Manage CRM users, roles, and status</p>
+          <h2 className="text-lg sm:text-xl font-bold text-foreground">User Management</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground">Manage CRM users, roles, and status</p>
         </div>
         <Dialog open={showAdd} onOpenChange={setShowAdd}>
           <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-1" /> Add User</Button>
+            <Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add User</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Add New User</DialogTitle></DialogHeader>
@@ -243,80 +240,99 @@ export default function UserManagementPage() {
         <div className="grid gap-3">
           {users.map((user) => (
             <Card key={user.user_id} className={!user.is_active ? "opacity-50" : ""}>
-              <CardContent className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                    {user.full_name?.charAt(0) || "?"}
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  {/* User info */}
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground shrink-0">
+                      {user.full_name?.charAt(0) || "?"}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-foreground text-sm truncate">{user.full_name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                      {user.phone && <p className="text-xs text-muted-foreground truncate">{user.phone}</p>}
+                    </div>
+                    {/* Badges inline on mobile */}
+                    <div className="flex items-center gap-1.5 sm:hidden shrink-0">
+                      <Badge variant={user.is_active ? "default" : "outline"} className="text-[10px] px-1.5 py-0">
+                        {user.is_active ? "Active" : "Inactive"}
+                      </Badge>
+                      <Badge variant={user.role === "admin" ? "default" : "secondary"} className="capitalize text-[10px] px-1.5 py-0">
+                        {user.role}
+                      </Badge>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-foreground">{user.full_name}</p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
-                    {user.phone && <p className="text-xs text-muted-foreground">{user.phone}</p>}
+
+                  {/* Actions */}
+                  <div className="flex items-center justify-between sm:justify-end gap-1 sm:gap-2">
+                    {/* Desktop badges */}
+                    <div className="hidden sm:flex items-center gap-2">
+                      <Badge variant={user.is_active ? "default" : "outline"} className="text-xs">
+                        {user.is_active ? "Active" : "Inactive"}
+                      </Badge>
+                      <Badge variant={user.role === "admin" ? "default" : "secondary"} className="capitalize">
+                        {user.role}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-0.5 sm:gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setPasswordUser(user)} title="Change Password">
+                        <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleActive(user)} title={user.is_active ? "Deactivate" : "Activate"}>
+                        {user.is_active ? <UserX className="h-3.5 w-3.5 text-destructive" /> : <UserCheck className="h-3.5 w-3.5 text-green-600" />}
+                      </Button>
+                      <Dialog open={editUser?.user_id === user.user_id} onOpenChange={(open) => !open && setEditUser(null)}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="h-8 text-xs px-2" onClick={() => openEdit(user)}>
+                            <Pencil className="h-3 w-3 sm:mr-1" /> <span className="hidden sm:inline">Edit</span>
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader><DialogTitle>Edit User</DialogTitle></DialogHeader>
+                          <div className="space-y-4">
+                            <div><Label>Full Name</Label><Input value={editName} onChange={(e) => setEditName(e.target.value)} /></div>
+                            <div><Label>Email</Label><Input value={editUser?.email || ""} disabled className="bg-muted" /></div>
+                            <div><Label>Phone</Label><Input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} /></div>
+                            <div>
+                              <Label>Role</Label>
+                              <Select value={editRole} onValueChange={(v) => setEditRole(v as AppRole)}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                  <SelectItem value="agent">Agent</SelectItem>
+                                  <SelectItem value="telecaller">Telecaller</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <Button onClick={handleSave} disabled={saving} className="w-full">
+                              {saving ? "Saving..." : "Save Changes"}
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" title="Delete User" disabled={deleting === user.user_id}>
+                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete User</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to permanently delete <span className="font-medium">{user.full_name}</span> ({user.email})? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDeleteUser(user)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={user.is_active ? "default" : "outline"} className="text-xs">
-                    {user.is_active ? "Active" : "Inactive"}
-                  </Badge>
-                  <Badge variant={user.role === "admin" ? "default" : "secondary"} className="capitalize">
-                    {user.role}
-                  </Badge>
-                  <Button variant="ghost" size="icon" onClick={() => setPasswordUser(user)} title="Change Password">
-                    <KeyRound className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => toggleActive(user)} title={user.is_active ? "Deactivate" : "Activate"}>
-                    {user.is_active ? <UserX className="h-4 w-4 text-destructive" /> : <UserCheck className="h-4 w-4 text-green-600" />}
-                  </Button>
-                  <Dialog open={editUser?.user_id === user.user_id} onOpenChange={(open) => !open && setEditUser(null)}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" onClick={() => openEdit(user)}>
-                        <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader><DialogTitle>Edit User</DialogTitle></DialogHeader>
-                      <div className="space-y-4">
-                        <div><Label>Full Name</Label><Input value={editName} onChange={(e) => setEditName(e.target.value)} /></div>
-                        <div><Label>Email</Label><Input value={editUser?.email || ""} disabled className="bg-muted" /></div>
-                        <div><Label>Phone</Label><Input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} /></div>
-                        <div>
-                          <Label>Role</Label>
-                          <Select value={editRole} onValueChange={(v) => setEditRole(v as AppRole)}>
-                            <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="admin">Admin</SelectItem>
-                              <SelectItem value="agent">Agent</SelectItem>
-                              <SelectItem value="telecaller">Telecaller</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <Button onClick={handleSave} disabled={saving} className="w-full">
-                          {saving ? "Saving..." : "Save Changes"}
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" title="Delete User" disabled={deleting === user.user_id}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete User</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to permanently delete <span className="font-medium">{user.full_name}</span> ({user.email})? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteUser(user)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
                 </div>
               </CardContent>
             </Card>

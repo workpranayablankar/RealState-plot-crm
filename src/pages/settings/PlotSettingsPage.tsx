@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Edit, MapPin } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type PlotStatus = "Available" | "Booked" | "Sold";
 
@@ -36,6 +37,7 @@ export default function PlotSettingsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const isMobile = useIsMobile();
 
   const fetchPlots = async () => {
     setLoading(true);
@@ -72,24 +74,21 @@ export default function PlotSettingsPage() {
   plots.forEach((p) => counts[p.status]++);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-foreground">Property / Plot Management</h2>
-          <p className="text-sm text-muted-foreground">{plots.length} plots total</p>
+          <h2 className="text-lg sm:text-xl font-bold text-foreground">Property / Plot Management</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground">{plots.length} plots total</p>
         </div>
-        <Button onClick={openNew}><Plus className="h-4 w-4 mr-1" /> Add Plot</Button>
+        <Button size="sm" onClick={openNew}><Plus className="h-4 w-4 mr-1" /> Add Plot</Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         {(["Available", "Booked", "Sold"] as PlotStatus[]).map((s) => (
           <Card key={s}>
-            <CardContent className="flex items-center justify-between p-4">
-              <div>
-                <p className="text-sm text-muted-foreground">{s}</p>
-                <p className="text-2xl font-bold text-foreground">{counts[s]}</p>
-              </div>
-              <Badge className={STATUS_COLORS[s]}>{s}</Badge>
+            <CardContent className="p-2.5 sm:p-4">
+              <p className="text-[10px] sm:text-sm text-muted-foreground">{s}</p>
+              <p className="text-lg sm:text-2xl font-bold text-foreground">{counts[s]}</p>
             </CardContent>
           </Card>
         ))}
@@ -97,7 +96,34 @@ export default function PlotSettingsPage() {
 
       {loading ? (
         <p className="text-muted-foreground">Loading...</p>
+      ) : isMobile ? (
+        /* Mobile: card layout */
+        <div className="space-y-2">
+          {plots.map((p) => (
+            <Card key={p.id}>
+              <CardContent className="p-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-sm text-foreground truncate">{p.plot_name}</p>
+                    <p className="text-xs text-muted-foreground">#{p.plot_no}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <Badge className={`text-[10px] ${STATUS_COLORS[p.status]}`}>{p.status}</Badge>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(p)}><Edit className="h-3.5 w-3.5" /></Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1 mt-2 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1 truncate"><MapPin className="h-3 w-3 shrink-0" />{p.location || "—"}</span>
+                  <span className="truncate">Size: {p.size || "—"}</span>
+                  <span className="truncate font-medium text-foreground">{p.price || "—"}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          {plots.length === 0 && <p className="text-center text-muted-foreground py-8">No plots added yet.</p>}
+        </div>
       ) : (
+        /* Desktop: table */
         <Card>
           <CardContent className="p-0">
             <table className="w-full text-sm">
