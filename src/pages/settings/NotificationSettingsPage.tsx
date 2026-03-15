@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { Bell, Mail, MessageCircle } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface NotifPref {
   id: string;
@@ -24,6 +25,7 @@ const EVENT_LABELS: Record<string, string> = {
 export default function NotificationSettingsPage() {
   const [prefs, setPrefs] = useState<NotifPref[]>([]);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   const fetchPrefs = async () => {
     setLoading(true);
@@ -47,15 +49,46 @@ export default function NotificationSettingsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-foreground">Notification Settings</h2>
-        <p className="text-sm text-muted-foreground">Control which alerts are sent and through which channels</p>
+        <h2 className="text-lg sm:text-xl font-bold text-foreground">Notification Settings</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground">Control which alerts are sent and through which channels</p>
       </div>
 
       {loading ? (
         <p className="text-muted-foreground">Loading...</p>
+      ) : isMobile ? (
+        /* Mobile: card layout */
+        <div className="space-y-2">
+          {prefs.map((pref) => (
+            <Card key={pref.id}>
+              <CardContent className="p-3">
+                <p className="text-sm font-medium text-foreground mb-2">
+                  {EVENT_LABELS[pref.event_type] || pref.event_type}
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="flex flex-col items-center gap-1">
+                    <Bell className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-[10px] text-muted-foreground">In-App</span>
+                    <Switch checked={pref.in_app} onCheckedChange={() => toggle(pref, "in_app")} />
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-[10px] text-muted-foreground">Email</span>
+                    <Switch checked={pref.email} onCheckedChange={() => toggle(pref, "email")} />
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <MessageCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-[10px] text-muted-foreground">SMS</span>
+                    <Switch checked={pref.sms} onCheckedChange={() => toggle(pref, "sms")} />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       ) : (
+        /* Desktop: table */
         <Card>
           <CardContent className="p-0">
             <table className="w-full text-sm">
