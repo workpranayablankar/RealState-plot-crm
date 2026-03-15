@@ -309,15 +309,15 @@ export default function IntegrationsPage() {
 
       {/* Default Platform Key */}
       <Card className="border-primary/20">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <p className="text-sm font-medium text-foreground">Platform API Key</p>
-              <p className="text-xs text-muted-foreground">Default key for webhook integrations. Include as <code className="text-xs">apikey</code> header.</p>
+              <p className="text-xs text-muted-foreground">Default key for webhooks. Include as <code className="text-xs">apikey</code> header.</p>
             </div>
             <div className="flex items-center gap-2">
-              <code className="rounded bg-muted px-2 py-1 text-xs font-mono text-foreground">
-                {ANON_KEY ? ANON_KEY.slice(0, 24) + "..." : "Not configured"}
+              <code className="rounded bg-muted px-2 py-1 text-[10px] sm:text-xs font-mono text-foreground truncate max-w-[180px] sm:max-w-none">
+                {ANON_KEY ? ANON_KEY.slice(0, 20) + "..." : "Not configured"}
               </code>
               <Button variant="outline" size="sm" onClick={() => copyText(ANON_KEY, "Platform Key")}>
                 <Copy className="h-3 w-3" />
