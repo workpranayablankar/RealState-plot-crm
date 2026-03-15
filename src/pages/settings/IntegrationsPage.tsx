@@ -329,10 +329,10 @@ export default function IntegrationsPage() {
 
       {/* Integration Tabs */}
       <Tabs defaultValue="website">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
           {integrations.map((i) => (
-            <TabsTrigger key={i.id} value={i.id} className="text-xs gap-1">
-              <i.icon className="h-3.5 w-3.5" /> {i.name.split(" ")[0]}
+            <TabsTrigger key={i.id} value={i.id} className="text-[10px] sm:text-xs gap-1 px-1.5 sm:px-3 py-1.5">
+              <i.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" /> <span className="truncate">{i.name.split(" ")[0]}</span>
             </TabsTrigger>
           ))}
         </TabsList>
