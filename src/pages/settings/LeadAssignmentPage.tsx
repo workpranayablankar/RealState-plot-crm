@@ -83,8 +83,8 @@ export default function LeadAssignmentPage() {
                 <p className="text-sm text-muted-foreground mt-1">
                   Leads are distributed evenly across agents in rotation.
                 </p>
-                <div className="mt-2 text-xs text-muted-foreground bg-muted/50 rounded p-2 font-mono">
-                  Lead 1 → Agent 1 &nbsp;•&nbsp; Lead 2 → Agent 2 &nbsp;•&nbsp; Lead 3 → Agent 3 &nbsp;•&nbsp; ...
+                <div className="mt-2 text-xs text-muted-foreground bg-muted/50 rounded p-2 font-mono break-all">
+                  Lead 1 → Agent 1 • Lead 2 → Agent 2 • Lead 3 → Agent 3 • ...
                 </div>
               </div>
             </div>
