@@ -211,8 +211,8 @@ export default function IntegrationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-foreground">Integrations</h2>
-        <p className="text-sm text-muted-foreground">Connect external lead sources and manage developer API keys</p>
+        <h2 className="text-lg sm:text-xl font-bold text-foreground">Integrations</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground">Connect external lead sources and manage API keys</p>
       </div>
 
       {/* Developer API Keys Section */}
