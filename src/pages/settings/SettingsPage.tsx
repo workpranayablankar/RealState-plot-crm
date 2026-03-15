@@ -32,36 +32,38 @@ export default function SettingsPage() {
 
   return (
     <AppLayout>
-      <div className="flex gap-6">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-6">
         {/* Settings sidebar */}
-        <aside className="w-56 shrink-0 space-y-1">
+        <aside className="w-full md:w-56 shrink-0 space-y-1">
           <h2 className="mb-3 text-lg font-bold text-foreground">Settings</h2>
-          {settingsLinks.map((link) => {
-            const isActive = location.pathname === link.to;
-            return (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <link.icon className="h-4 w-4 shrink-0" />
-                {link.label}
-              </NavLink>
-            );
-          })}
+          <div className="flex flex-wrap gap-1 md:flex-col md:gap-0">
+            {settingsLinks.map((link) => {
+              const isActive = location.pathname === link.to;
+              return (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs md:text-sm font-medium transition-colors whitespace-nowrap ${
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <link.icon className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline">{link.label}</span>
+                </NavLink>
+              );
+            })}
+          </div>
         </aside>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
           {isRoot ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <Wrench className="h-12 w-12 text-muted-foreground mb-4" />
-              <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-              <p className="text-muted-foreground mt-2">Select a section from the menu to configure your CRM.</p>
+            <div className="flex flex-col items-center justify-center py-12 md:py-20 text-center">
+              <Wrench className="h-10 w-10 md:h-12 md:w-12 text-muted-foreground mb-4" />
+              <h1 className="text-xl md:text-2xl font-bold text-foreground">Settings</h1>
+              <p className="text-muted-foreground mt-2 text-sm">Select a section from the menu to configure your CRM.</p>
             </div>
           ) : (
             <Outlet />
